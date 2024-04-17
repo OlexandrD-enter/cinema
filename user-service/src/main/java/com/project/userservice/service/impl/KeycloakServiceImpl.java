@@ -6,7 +6,6 @@ import com.project.userservice.service.exception.UserAlreadyExistsException;
 import jakarta.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.CredentialRepresentation;
@@ -19,13 +18,15 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class KeycloakServiceImpl implements KeycloakService {
 
   private final Keycloak keycloak;
+  private final String realm;
 
-  @Value("${keycloak.realm}")
-  private String realm;
+  public KeycloakServiceImpl(Keycloak keycloak, @Value("${keycloak.realm}") String realm) {
+    this.keycloak = keycloak;
+    this.realm = realm;
+  }
 
   @Override
   public Response createUser(UserRegistrationRequest request) {
