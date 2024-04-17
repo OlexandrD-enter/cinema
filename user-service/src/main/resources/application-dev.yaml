@@ -2,3 +2,35 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
+
+spring:
+  config:
+    import: file:user-service.env[.properties]
+
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: users_service
+
+  flyway:
+    schemas: users_service
+    locations: db/migration/base
+
+keycloak:
+  admin-username: ${KEYCLOAK_ADMIN_USERNAME}
+  admin-password: ${KEYCLOAK_ADMIN_PASSWORD}
+  admin-realm: ${KEYCLOAK_ADMIN_REALM}
+  admin-resource: ${KEYCLOAK_ADMIN_RESOURCE}
+  realm: ${KEYCLOAK_REALM}
+  resource: ${KEYCLOAK_RESOURCE}
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL}
+  credentials:
+    secret: ${KEYCLOAK_SECRET}
+  base-url: ${KEYCLOAK_BASE_URL}
