@@ -18,6 +18,7 @@ import lombok.Setter;
 @Setter
 @Builder
 public class UserRegistrationRequest {
+
   @NotNull(message = "Not valid email")
   @Pattern(regexp = "^(?=.{6,30}@.{4,30}$)"
       + "[a-zA-Z0-9]+(?:[+.-]?[a-zA-Z0-9]+)*"
@@ -27,7 +28,8 @@ public class UserRegistrationRequest {
   private String email;
 
   @Schema(example = "Test12345678@")
-  @NotNull(message = "Not valid password")
+  @NotNull(message = "Not valid password, at least 1 upper case letter,"
+      + " 1 lower case, 1 number, 1 symbol and min length is 6")
   @Pattern(
       regexp = "^(?=.*[0-9])"
           + "(?=.*[a-z])"
