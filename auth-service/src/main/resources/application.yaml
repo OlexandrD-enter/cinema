@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: auth-service
+
+  profiles:
+    active: dev
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${JWK_SET_URI}
+
+server:
+  port: 8090
