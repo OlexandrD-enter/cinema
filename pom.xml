@@ -21,16 +21,14 @@
     <checkstyle.config>google_checks.xml</checkstyle.config>
   </properties>
   <dependencies>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
+
   </dependencies>
 
   <modules>
     <module>discovery-service</module>
     <module>user-service</module>
     <module>auth-service</module>
+    <module>gateway-service</module>
   </modules>
 
   <build>
