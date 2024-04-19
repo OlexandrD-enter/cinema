@@ -5,7 +5,7 @@ eureka:
 
 spring:
   config:
-    import: file:user-service.env[.properties]
+    import: file:.env[.properties]
 
   datasource:
     url: ${DATABASE_URL}
@@ -28,6 +28,12 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: ${JWK_SET_URI}
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
 
 keycloak:
   admin-username: ${KEYCLOAK_ADMIN_USERNAME}

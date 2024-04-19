@@ -1,14 +1,17 @@
 spring:
   application:
-    name: user-service
+    name: notification-service
+
   profiles:
     active: dev
 
 server:
-  port: 8091
+  port: 8094
 
 rabbitmq:
   exchange:
     user: user-exchange
+  queue:
+    email-verification: email-verification-queue
   routing-key:
     email-verification: user.email-verification

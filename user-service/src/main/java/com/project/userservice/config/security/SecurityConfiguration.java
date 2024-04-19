@@ -23,7 +23,7 @@ public class SecurityConfiguration {
 
   private static final String[] AUTH_WHITELIST = {
       // -- Auth
-      "/api/v1/auth/**",
+      "/api/v1/users/register",
   };
 
   private final JwtAuthConverter jwtAuthConverter;

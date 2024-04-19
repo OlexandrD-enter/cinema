@@ -7,9 +7,19 @@ import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuration class for configuring routes in the gateway.
+ */
 @Configuration
 @RequiredArgsConstructor
 public class GatewayConfig {
+
+  /**
+   * Configures the routes for the gateway.
+   *
+   * @param builder The RouteLocatorBuilder used to construct routes.
+   * @return The configured RouteLocator.
+   */
   @Bean
   public RouteLocator routes(RouteLocatorBuilder builder) {
     return builder.routes()

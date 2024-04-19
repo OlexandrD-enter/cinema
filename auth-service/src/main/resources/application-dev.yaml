@@ -5,7 +5,7 @@ eureka:
 
 spring:
   config:
-    import: file:auth-service.env[.properties]
+    import: file:.env[.properties]
 
 keycloak:
   admin-username: ${KEYCLOAK_ADMIN_USERNAME}

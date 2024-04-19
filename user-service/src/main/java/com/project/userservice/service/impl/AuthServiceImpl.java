@@ -3,6 +3,7 @@ package com.project.userservice.service.impl;
 import com.project.userservice.domain.dto.UserRegistrationRequest;
 import com.project.userservice.domain.dto.UserRegistrationResponse;
 import com.project.userservice.domain.mapper.UserMapper;
+import com.project.userservice.messaging.UserEventPublisher;
 import com.project.userservice.persistence.model.User;
 import com.project.userservice.service.AuthService;
 import com.project.userservice.service.KeycloakService;
@@ -25,6 +26,7 @@ public class AuthServiceImpl implements AuthService {
   private final KeycloakService keycloakService;
   private final UserService userService;
   private final UserMapper userMapper;
+  private final UserEventPublisher publisher;
 
   @Override
   @Transactional
@@ -36,6 +38,8 @@ public class AuthServiceImpl implements AuthService {
         throw new KeycloakException("Unable to create user in keycloak");
       }
     }
+
+    publisher.sendEmailVerificationEvent(user.getEmail(), "token");
 
     return userMapper.toRegistrationResponse(user);
   }
