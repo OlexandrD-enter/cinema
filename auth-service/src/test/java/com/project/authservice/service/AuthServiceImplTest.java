@@ -8,6 +8,7 @@ import com.project.authservice.domain.dto.UserLoginRequest;
 import com.project.authservice.service.exception.EmailNotVerifiedException;
 import com.project.authservice.service.exception.IncorrectCredentialsException;
 import com.project.authservice.service.impl.AuthServiceImpl;
+import com.project.authservice.service.impl.KeycloakServiceImpl;
 import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,8 @@ public class AuthServiceImplTest {
   private Keycloak keycloak;
   @Mock
   private UsersResource usersResource;
+  @Mock
+  private KeycloakServiceImpl keycloakClient;
   private AuthServiceImpl authService;
 
   @BeforeEach
@@ -35,7 +38,8 @@ public class AuthServiceImplTest {
         "clientId",
         "http://localhost:8080",
         "realm",
-        "secretKey"
+        "secretKey",
+        keycloakClient
     );
   }
 
@@ -78,7 +82,7 @@ public class AuthServiceImplTest {
   void login_UserNotFound_IncorrectCredentialsExceptionThrown() {
     // Given
     UserLoginRequest userLoginRequest = new UserLoginRequest();
-    userLoginRequest.setEmail("nonexistent@example.com");
+    userLoginRequest.setEmail("nonexistent@gmail.com");
     userLoginRequest.setPassword("password");
 
     RealmResource realmResource = mock(RealmResource.class);
@@ -95,7 +99,7 @@ public class AuthServiceImplTest {
   void login_EmailNotVerified_EmailNotVerifiedExceptionThrown() {
     // Given
     UserLoginRequest userLoginRequest = new UserLoginRequest();
-    userLoginRequest.setEmail("test@example.com");
+    userLoginRequest.setEmail("demchenko@gmail.com");
     userLoginRequest.setPassword("password");
 
     UserRepresentation userRepresentation = new UserRepresentation();

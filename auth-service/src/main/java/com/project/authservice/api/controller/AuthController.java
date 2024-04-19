@@ -1,6 +1,7 @@
 package com.project.authservice.api.controller;
 
-import com.project.authservice.domain.dto.LoginResponse;
+import com.project.authservice.domain.dto.RefreshToken;
+import com.project.authservice.domain.dto.TokenResponse;
 import com.project.authservice.domain.dto.UserLoginRequest;
 import com.project.authservice.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,7 +27,20 @@ public class AuthController {
 
   @Operation(summary = "This method is used for login.")
   @PostMapping("/login")
-  public ResponseEntity<LoginResponse> login(@RequestBody @Valid UserLoginRequest request) {
+  public ResponseEntity<TokenResponse> login(@RequestBody @Valid UserLoginRequest request) {
     return ResponseEntity.status(HttpStatus.OK).body(authService.login(request));
+  }
+
+  @Operation(summary = "This method is used for logout.")
+  @PostMapping("/logout")
+  public ResponseEntity<HttpStatus> logout(@RequestBody @Valid RefreshToken token) {
+    authService.logout(token.getRefreshToken());
+    return ResponseEntity.status(HttpStatus.OK).build();
+  }
+
+  @Operation(summary = "This method is used for refresh of the token.")
+  @PostMapping("/token/refresh")
+  public ResponseEntity<TokenResponse> refreshToken(@RequestBody @Valid RefreshToken token) {
+    return ResponseEntity.ok(authService.refreshToken(token.getRefreshToken()));
   }
 }

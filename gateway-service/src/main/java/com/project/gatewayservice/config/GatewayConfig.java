@@ -18,8 +18,8 @@ public class GatewayConfig {
             .rewritePath("/auth/register", "/api/v1/users/register")
         ).uri("lb://user-service"))
         //AUTH-SERVICE ROUTING
-        .route(r -> r.path("/auth/login").filters(f -> f
-            .rewritePath("/auth/login", "/api/v1/auth/login")
+        .route(r -> r.path("/auth/**").filters(f -> f
+            .rewritePath("/auth/", "/api/v1/auth/")
         ).uri("lb://auth-service"))
         .build();
   }
