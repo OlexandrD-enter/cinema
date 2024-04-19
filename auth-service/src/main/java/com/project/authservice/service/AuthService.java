@@ -2,7 +2,6 @@ package com.project.authservice.service;
 
 import com.project.authservice.domain.dto.TokenResponse;
 import com.project.authservice.domain.dto.UserLoginRequest;
-import com.project.authservice.domain.dto.UserLogoutRequest;
 
 /**
  * AuthService interface for user authentication-related operations.

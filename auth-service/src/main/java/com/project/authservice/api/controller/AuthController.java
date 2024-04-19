@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Controller handling authentication-related endpoints. Endpoints provided:<br>
  * - /login: Authenticates a user based on the login request.<br>
+ * - /logout: Used for logout user from keycloak session.<br>
+ * - /token/refresh: Used for refresh of the token.<br>
  */
 @RestController
 @RequiredArgsConstructor
