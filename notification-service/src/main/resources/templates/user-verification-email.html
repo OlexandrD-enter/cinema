@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Congratulations on Successful Registration</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: #1639e5;
+      text-align: center;
+    }
+
+    p {
+      font-size: 16px;
+      color: #444;
+    }
+
+    .message {
+      margin-top: 20px;
+    }
+
+    .centered-button {
+      text-align: center;
+    }
+
+    .button-link {
+      background-color: #1639e5;
+      color: white !important;
+      padding: 20px 30px;
+      display: inline-block;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+    }
+
+    .button-link:hover {
+      background-color: #0f2c8a;
+    }
+  </style>
+
+</head>
+<body>
+<div class="container">
+  <h1>Congratulations on Successful Registration</h1>
+  <div class="message">
+    <p th:text="'Dear ' + ${email} + ', we are excited to have you on board. Your registration is complete, and you can now enjoy all the benefits of our platform.'"></p>
+    <p>Please verify your email, by pressing button below. Then you will be able to use our
+      service.</p>
+    <div class="centered-button">
+      <a th:href="${confirmEmailUrl}" class="button-link">
+        Verify email
+      </a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

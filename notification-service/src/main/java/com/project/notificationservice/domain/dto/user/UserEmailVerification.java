@@ -1,4 +1,4 @@
-package com.project.notificationservice.domain.dto;
+package com.project.notificationservice.domain.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -15,3 +15,7 @@ rabbitmq:
     email-verification: email-verification-queue
   routing-key:
     email-verification: user.email-verification
+
+email:
+  source-address: ${EMAIL_SOURCE_ADDRESS}
+  verification-url: ${EMAIL_VERIFICATION_URL}

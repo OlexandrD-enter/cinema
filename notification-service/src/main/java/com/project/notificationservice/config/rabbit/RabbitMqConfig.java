@@ -1,4 +1,4 @@
-package com.project.notificationservice.config;
+package com.project.notificationservice.config.rabbit;
 
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
