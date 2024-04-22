@@ -1,5 +1,6 @@
 package com.project.userservice.service.impl;
 
+import com.project.userservice.domain.dto.UserEmailVerificationResponse;
 import com.project.userservice.domain.dto.UserRegistrationRequest;
 import com.project.userservice.domain.dto.UserRegistrationResponse;
 import com.project.userservice.domain.mapper.UserMapper;
@@ -32,8 +33,8 @@ public class AuthServiceImpl implements AuthService {
   private final UserMapper userMapper;
   private final UserEventPublisher publisher;
 
-  @Override
   @Transactional
+  @Override
   public UserRegistrationResponse createUser(UserRegistrationRequest registrationRequest) {
     User user = userService.saveUser(registrationRequest);
     UserToken userToken = userTokenService.saveUserToken(user, TokenType.EMAIL_VERIFICATION);
@@ -47,5 +48,18 @@ public class AuthServiceImpl implements AuthService {
     publisher.sendEmailVerificationEvent(user.getEmail(), userToken.getToken());
 
     return userMapper.toRegistrationResponse(user);
+  }
+
+  @Transactional
+  @Override
+  public UserEmailVerificationResponse verifyUserEmail(String token) {
+    UserToken userToken = userTokenService.validateToken(token);
+
+    String userEmail = userToken.getUser().getEmail();
+
+    User user = userService.verifyUser(userEmail);
+    keycloakService.verifyUser(userEmail);
+
+    return userMapper.toEmailVerificationResponse(user);
   }
 }

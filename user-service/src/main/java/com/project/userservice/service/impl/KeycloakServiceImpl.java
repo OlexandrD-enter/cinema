@@ -3,6 +3,7 @@ package com.project.userservice.service.impl;
 import com.project.userservice.domain.dto.UserRegistrationRequest;
 import com.project.userservice.service.KeycloakService;
 import com.project.userservice.service.exception.UserAlreadyExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +31,7 @@ public class KeycloakServiceImpl implements KeycloakService {
 
   @Override
   public Response createUser(UserRegistrationRequest request) {
-    if (!findByUsername(request.getEmail()).isEmpty()) {
+    if (!findByEmail(request.getEmail()).isEmpty()) {
       throw new UserAlreadyExistsException(
           String.format("User with email='%s' already exists", request.getEmail()));
     }
@@ -45,8 +46,25 @@ public class KeycloakServiceImpl implements KeycloakService {
     return response;
   }
 
-  private List<UserRepresentation> findByUsername(String username) {
-    return keycloak.realm(realm).users().search(username);
+  @Override
+  public void verifyUser(String email) {
+    log.debug("Trying to verify user {} in keycloak", email);
+    List<UserRepresentation> usersByEmail = findByEmail(email);
+    if (usersByEmail.isEmpty()) {
+      throw new EntityNotFoundException(
+          String.format("User with email='%s' not found", email));
+    }
+    UserRepresentation userRepresentation = usersByEmail.get(0);
+    userRepresentation.setEmailVerified(true);
+
+    keycloak.realm(realm).users().get(userRepresentation.getId())
+        .update(userRepresentation);
+
+    log.debug("User {} verified in keycloak", email);
+  }
+
+  private List<UserRepresentation> findByEmail(String email) {
+    return keycloak.realm(realm).users().search(email);
   }
 
   private CredentialRepresentation preparePasswordRepresentation(String password) {

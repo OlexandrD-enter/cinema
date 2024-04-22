@@ -8,18 +8,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Represents a response object used for user registration.
+ * Represents a response object used for user email verification.
  */
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Builder
-public class UserRegistrationResponse {
+public class UserEmailVerificationResponse {
 
-  private Long id;
   private String email;
-  private String firstName;
-  private String lastName;
   private UserStatus userStatus;
 }

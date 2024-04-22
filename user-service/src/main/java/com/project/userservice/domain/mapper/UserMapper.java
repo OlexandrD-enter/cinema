@@ -1,5 +1,6 @@
 package com.project.userservice.domain.mapper;
 
+import com.project.userservice.domain.dto.UserEmailVerificationResponse;
 import com.project.userservice.domain.dto.UserRegistrationRequest;
 import com.project.userservice.domain.dto.UserRegistrationResponse;
 import com.project.userservice.persistence.model.User;
@@ -17,4 +18,6 @@ public interface UserMapper {
   User toUser(UserRegistrationRequest userRegistrationRequest);
 
   UserRegistrationResponse toRegistrationResponse(User user);
+
+  UserEmailVerificationResponse toEmailVerificationResponse(User user);
 }

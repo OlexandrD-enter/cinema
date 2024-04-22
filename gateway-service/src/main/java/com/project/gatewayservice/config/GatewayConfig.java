@@ -24,6 +24,9 @@ public class GatewayConfig {
   public RouteLocator routes(RouteLocatorBuilder builder) {
     return builder.routes()
         //USER-SERVICE ROUTING
+        .route(r -> r.path("/users/**").filters(f -> f
+            .rewritePath("/users/", "/api/v1/users/")
+        ).uri("lb://user-service"))
         .route(r -> r.path("/auth/register").filters(f -> f
             .rewritePath("/auth/register", "/api/v1/users/register")
         ).uri("lb://user-service"))

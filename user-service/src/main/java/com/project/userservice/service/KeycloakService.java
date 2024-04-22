@@ -9,4 +9,6 @@ import jakarta.ws.rs.core.Response;
 public interface KeycloakService {
 
   Response createUser(UserRegistrationRequest registrationRequest);
+
+  void verifyUser(String email);
 }

@@ -9,4 +9,6 @@ import com.project.userservice.persistence.model.User;
 public interface UserService {
 
   User saveUser(UserRegistrationRequest userRegistrationRequest);
+
+  User verifyUser(String email);
 }

@@ -10,4 +10,6 @@ import com.project.userservice.persistence.model.UserToken;
 public interface UserTokenService {
 
   UserToken saveUserToken(User user, TokenType tokenType);
+
+  UserToken validateToken(String token);
 }

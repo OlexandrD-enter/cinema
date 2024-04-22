@@ -1,5 +1,6 @@
 package com.project.userservice.service;
 
+import com.project.userservice.domain.dto.UserEmailVerificationResponse;
 import com.project.userservice.domain.dto.UserRegistrationRequest;
 import com.project.userservice.domain.dto.UserRegistrationResponse;
 
@@ -9,4 +10,7 @@ import com.project.userservice.domain.dto.UserRegistrationResponse;
 public interface AuthService {
 
   UserRegistrationResponse createUser(UserRegistrationRequest registrationRequest);
+
+  UserEmailVerificationResponse verifyUserEmail(String token);
+
 }
