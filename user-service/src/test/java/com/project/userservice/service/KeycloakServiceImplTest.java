@@ -70,7 +70,7 @@ public class KeycloakServiceImplTest {
   }
 
   @Test
-  void createUser_WhenUserExist_ShouldThrowUserAlreadyExistsException() {
+  void createUser_WhenUserExist_ThrowsUserAlreadyExistsException() {
     // Given
     UserRegistrationRequest userRegistrationRequest = UserRegistrationRequest.builder()
         .email("demchenko@gmail.com")

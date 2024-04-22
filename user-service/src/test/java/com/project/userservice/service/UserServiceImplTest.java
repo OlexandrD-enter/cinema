@@ -68,7 +68,7 @@ public class UserServiceImplTest {
   }
 
   @Test
-  public void testSaveUser_WhenUserExist_ShouldThrowUserAlreadyExistsException() {
+  public void testSaveUser_WhenUserExist_ThrowsUserAlreadyExistsException() {
     // Given
     UserRegistrationRequest userRegistrationRequest = UserRegistrationRequest.builder()
         .email("demchenko@gmail.com")
