@@ -34,7 +34,6 @@ public class UserServiceImpl implements UserService {
     User user = userMapper.toUser(userRegistrationRequest);
     userRepository.save(user);
     log.debug("New user {} saved into db", user.getEmail());
-    System.out.println(user);
     return user;
   }
 }

@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Represents the email verification data for a user.
+ */
 @Getter
 @Setter
 @RequiredArgsConstructor

@@ -12,3 +12,7 @@ rabbitmq:
     user: user-exchange
   routing-key:
     email-verification: user.email-verification
+
+#minutes
+email:
+  retry-interval-time: ${RETRY_INTERVAL_TIME}

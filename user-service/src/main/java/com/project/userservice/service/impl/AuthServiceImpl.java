@@ -4,10 +4,13 @@ import com.project.userservice.domain.dto.UserRegistrationRequest;
 import com.project.userservice.domain.dto.UserRegistrationResponse;
 import com.project.userservice.domain.mapper.UserMapper;
 import com.project.userservice.messaging.UserEventPublisher;
+import com.project.userservice.persistence.enums.TokenType;
 import com.project.userservice.persistence.model.User;
+import com.project.userservice.persistence.model.UserToken;
 import com.project.userservice.service.AuthService;
 import com.project.userservice.service.KeycloakService;
 import com.project.userservice.service.UserService;
+import com.project.userservice.service.UserTokenService;
 import com.project.userservice.service.exception.KeycloakException;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +28,7 @@ public class AuthServiceImpl implements AuthService {
 
   private final KeycloakService keycloakService;
   private final UserService userService;
+  private final UserTokenService userTokenService;
   private final UserMapper userMapper;
   private final UserEventPublisher publisher;
 
@@ -32,6 +36,7 @@ public class AuthServiceImpl implements AuthService {
   @Transactional
   public UserRegistrationResponse createUser(UserRegistrationRequest registrationRequest) {
     User user = userService.saveUser(registrationRequest);
+    UserToken userToken = userTokenService.saveUserToken(user, TokenType.EMAIL_VERIFICATION);
 
     try (Response response = keycloakService.createUser(registrationRequest)) {
       if (response.getStatus() != 201) {
@@ -39,7 +44,7 @@ public class AuthServiceImpl implements AuthService {
       }
     }
 
-    publisher.sendEmailVerificationEvent(user.getEmail(), "token");
+    publisher.sendEmailVerificationEvent(user.getEmail(), userToken.getToken());
 
     return userMapper.toRegistrationResponse(user);
   }

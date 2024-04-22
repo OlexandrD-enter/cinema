@@ -8,6 +8,9 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+/**
+ * A component class responsible for listening to email verification messages and processing them.
+ */
 @Component
 @RequiredArgsConstructor
 public class RegistrationListener {
