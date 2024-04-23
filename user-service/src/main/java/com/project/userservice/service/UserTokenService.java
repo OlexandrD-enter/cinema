@@ -12,4 +12,6 @@ public interface UserTokenService {
   UserToken saveUserToken(User user, TokenType tokenType);
 
   UserToken validateToken(String token);
+
+  UserToken updateTokenByUserEmail(String email, TokenType tokenType);
 }

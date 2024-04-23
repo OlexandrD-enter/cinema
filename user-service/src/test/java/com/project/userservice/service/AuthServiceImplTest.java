@@ -3,6 +3,8 @@ package com.project.userservice.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -19,10 +21,12 @@ import com.project.userservice.persistence.model.User;
 import com.project.userservice.persistence.model.UserToken;
 import com.project.userservice.service.exception.KeycloakException;
 import com.project.userservice.service.exception.NotValidUserToken;
+import com.project.userservice.service.exception.UserTokenUpdateException;
 import com.project.userservice.service.impl.AuthServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -178,6 +182,60 @@ public class AuthServiceImplTest {
     verify(userService, times(1)).verifyUser("demchenko@gmail.com");
     verifyNoInteractions(keycloakService);
     verifyNoInteractions(userMapper);
+  }
+
+  @Test
+  void resendEmailConfirmation_EmailConfirmationResentSuccessfully() {
+    // Given
+    String email = "demchenko@gmail.com";
+    UserToken userToken = UserToken.builder()
+        .id(1L)
+        .token("oldToken")
+        .user(User.builder().email(email).build())
+        .tokenType(TokenType.EMAIL_VERIFICATION)
+        .isUsed(false)
+        .lastSendAt(LocalDateTime.now().minusHours(1))
+        .build();
+
+    when(userTokenService.updateTokenByUserEmail(email, TokenType.EMAIL_VERIFICATION)).thenReturn(
+        userToken);
+
+    // When
+    authService.resendEmailConfirmation(email);
+
+    // Then
+    verify(userTokenService, times(1)).updateTokenByUserEmail(email, TokenType.EMAIL_VERIFICATION);
+    verify(publisher, times(1)).sendEmailVerificationEvent(email, userToken.getToken());
+  }
+
+  @Test
+  void resendEmailConfirmation_TokenUpdatedTooSoon_ThrowsUserTokenUpdateException() {
+    // Given
+    String email = "demchenko@gmail.com";
+
+    when(userTokenService.updateTokenByUserEmail(email, TokenType.EMAIL_VERIFICATION))
+        .thenThrow(new UserTokenUpdateException("Token update too soon"));
+
+    // When & Then
+    assertThrows(UserTokenUpdateException.class, () -> authService.resendEmailConfirmation(email));
+
+    verify(userTokenService, times(1)).updateTokenByUserEmail(email, TokenType.EMAIL_VERIFICATION);
+    verify(publisher, never()).sendEmailVerificationEvent(anyString(), anyString());
+  }
+
+  @Test
+  void resendEmailConfirmation_TokenNotFound_ThrowsEntityNotFoundException() {
+    // Given
+    String email = "demchenko@gmail.com";
+
+    when(userTokenService.updateTokenByUserEmail(email, TokenType.EMAIL_VERIFICATION))
+        .thenThrow(new EntityNotFoundException("Token not found"));
+
+    // When & Then
+    assertThrows(EntityNotFoundException.class, () -> authService.resendEmailConfirmation(email));
+
+    verify(userTokenService, times(1)).updateTokenByUserEmail(email, TokenType.EMAIL_VERIFICATION);
+    verify(publisher, never()).sendEmailVerificationEvent(anyString(), anyString());
   }
 }
 

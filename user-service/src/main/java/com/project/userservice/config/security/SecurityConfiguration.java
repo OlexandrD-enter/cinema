@@ -25,6 +25,7 @@ public class SecurityConfiguration {
       // -- Auth
       "/api/v1/users/register",
       "/api/v1/users/email-confirm/**",
+      "/api/v1/users/resend/email-confirmation/**",
   };
 
   private final JwtAuthConverter jwtAuthConverter;
@@ -39,7 +40,7 @@ public class SecurityConfiguration {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.csrf(AbstractHttpConfigurer::disable)
-        .cors(withDefaults())
+        .cors(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
             authorizeRequests ->
                 authorizeRequests

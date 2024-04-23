@@ -62,4 +62,12 @@ public class AuthServiceImpl implements AuthService {
 
     return userMapper.toEmailVerificationResponse(user);
   }
+
+  @Override
+  public void resendEmailConfirmation(String email) {
+    UserToken userToken = userTokenService.updateTokenByUserEmail(email,
+        TokenType.EMAIL_VERIFICATION);
+
+    publisher.sendEmailVerificationEvent(userToken.getUser().getEmail(), userToken.getToken());
+  }
 }

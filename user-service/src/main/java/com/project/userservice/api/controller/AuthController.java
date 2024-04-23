@@ -17,9 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controller handling authentication-related endpoints. Endpoints provided:<br> - /register:
- * Creates a new user based on the provided registration request.<br> - /email-confirm: Verify user
- * email by token from email<br>
+ * Controller handling authentication-related endpoints. Endpoints provided:<br>
+ * - /register: Creates a new user based on the provided registration request.<br>
+ * - /email-confirm: Verify user email by token from email<br>
+ * - /resend/email-confirmation: Resend user email verification message<br>
  */
 @RestController
 @RequiredArgsConstructor
@@ -45,9 +46,10 @@ public class AuthController {
     return ResponseEntity.ok(authService.verifyUserEmail(token));
   }
 
-  @Operation(summary = "This method is used for verify user email.")
-  @GetMapping("/email-confirm")
-  public ResponseEntity<String> verifyUserEmailByToken() {
-    return ResponseEntity.ok("OK");
+  @Operation(summary = "This method is used for resending email confirmation to user.")
+  @PostMapping("/resend/email-confirmation/{email}")
+  public ResponseEntity<HttpStatus> resendEmailConfirmation(@PathVariable String email) {
+    authService.resendEmailConfirmation(email);
+    return ResponseEntity.ok().build();
   }
 }

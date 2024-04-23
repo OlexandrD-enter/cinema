@@ -13,4 +13,5 @@ public interface AuthService {
 
   UserEmailVerificationResponse verifyUserEmail(String token);
 
+  void resendEmailConfirmation(String email);
 }

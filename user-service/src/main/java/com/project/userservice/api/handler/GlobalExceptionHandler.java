@@ -1,9 +1,11 @@
 package com.project.userservice.api.handler;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import com.project.userservice.api.exception.CommonExceptionInfo;
 import com.project.userservice.service.exception.GenericException;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
@@ -55,5 +57,12 @@ public class GlobalExceptionHandler {
 
     return new ResponseEntity<>(new CommonExceptionInfo(BAD_REQUEST.value(), finalMessage),
         BAD_REQUEST);
+  }
+
+  @ExceptionHandler(EntityNotFoundException.class)
+  public ResponseEntity<CommonExceptionInfo> handleEntityNotFoundException(
+      EntityNotFoundException ex) {
+    return new ResponseEntity<>(new CommonExceptionInfo(NOT_FOUND.value(), ex.getMessage()),
+        NOT_FOUND);
   }
 }

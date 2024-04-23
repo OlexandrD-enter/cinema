@@ -2,6 +2,7 @@ package com.project.userservice.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,6 +18,7 @@ import com.project.userservice.persistence.model.UserToken;
 import com.project.userservice.persistence.repository.UserTokenRepository;
 import com.project.userservice.service.exception.NotValidUserToken;
 import com.project.userservice.service.exception.UserTokenAlreadyExistsException;
+import com.project.userservice.service.exception.UserTokenUpdateException;
 import com.project.userservice.service.impl.UserTokenServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
@@ -34,10 +36,11 @@ public class UserTokenServiceImplTest {
   @Mock
   private UserTokenRepository userTokenRepository;
   private UserTokenServiceImpl userTokenService;
+  private final int retryIntervalTime = 5;
 
   @BeforeEach
   void setUp() {
-    userTokenService = new UserTokenServiceImpl(userTokenRepository, 5);
+    userTokenService = new UserTokenServiceImpl(userTokenRepository, retryIntervalTime);
   }
 
   @Test
@@ -148,6 +151,81 @@ public class UserTokenServiceImplTest {
     // When & Then
     assertThrows(EntityNotFoundException.class, () -> userTokenService.validateToken(token));
     verify(userTokenRepository, times(1)).findByToken(token);
+    verify(userTokenRepository, never()).save(any(UserToken.class));
+  }
+
+  @Test
+  void updateTokenByUserEmail_ValidToken_SuccessfullyUpdated() {
+    //Given
+    String email = "demchenko@gmail.com";
+    TokenType tokenType = TokenType.EMAIL_VERIFICATION;
+    LocalDateTime lastSendAt = LocalDateTime.now().minusMinutes(retryIntervalTime + 1);
+    UserToken userToken = UserToken.builder()
+        .id(1L)
+        .token("oldToken")
+        .user(User.builder().email(email).build())
+        .tokenType(tokenType)
+        .isUsed(false)
+        .lastSendAt(lastSendAt)
+        .build();
+
+    when(userTokenRepository.findByUserEmailAndTokenType(email, tokenType)).thenReturn(
+        Optional.of(userToken));
+    when(userTokenRepository.save(any(UserToken.class))).thenAnswer(
+        invocation -> invocation.getArgument(0));
+
+    // When
+    UserToken updatedToken = userTokenService.updateTokenByUserEmail(email, tokenType);
+
+    // Then
+    assertNotNull(updatedToken);
+    assertNotEquals("oldToken", updatedToken.getToken());
+    assertFalse(updatedToken.getIsUsed());
+    assertTrue(updatedToken.getLastSendAt().isAfter(lastSendAt));
+    verify(userTokenRepository, times(1)).findByUserEmailAndTokenType(email, tokenType);
+    verify(userTokenRepository, times(1)).save(any(UserToken.class));
+  }
+
+  @Test
+  void updateTokenByUserEmail_TokenUpdatedTooSoon_ThrowsUserTokenUpdateException() {
+    // Given
+    String email = "demchenko@gmail.com";
+    TokenType tokenType = TokenType.EMAIL_VERIFICATION;
+    LocalDateTime lastSendAt = LocalDateTime.now();
+    UserToken userToken = UserToken.builder()
+        .id(1L)
+        .token("oldToken")
+        .user(User.builder().email(email).build())
+        .tokenType(tokenType)
+        .isUsed(false)
+        .lastSendAt(lastSendAt)
+        .build();
+
+    when(userTokenRepository.findByUserEmailAndTokenType(email, tokenType)).thenReturn(
+        Optional.of(userToken));
+
+    // When & Then
+    assertThrows(UserTokenUpdateException.class,
+        () -> userTokenService.updateTokenByUserEmail(email, tokenType));
+
+    verify(userTokenRepository, times(1)).findByUserEmailAndTokenType(email, tokenType);
+    verify(userTokenRepository, never()).save(any(UserToken.class));
+  }
+
+  @Test
+  void updateTokenByUserEmail_TokenNotFound_ThrowsEntityNotFoundException() {
+    // Given
+    String email = "demchenko@gmail.com";
+    TokenType tokenType = TokenType.EMAIL_VERIFICATION;
+
+    when(userTokenRepository.findByUserEmailAndTokenType(email, tokenType)).thenReturn(
+        Optional.empty());
+
+    // When & Then
+    assertThrows(EntityNotFoundException.class,
+        () -> userTokenService.updateTokenByUserEmail(email, tokenType));
+
+    verify(userTokenRepository, times(1)).findByUserEmailAndTokenType(email, tokenType);
     verify(userTokenRepository, never()).save(any(UserToken.class));
   }
 }
