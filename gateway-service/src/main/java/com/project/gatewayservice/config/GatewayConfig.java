@@ -34,6 +34,10 @@ public class GatewayConfig {
         .route(r -> r.path("/auth/**").filters(f -> f
             .rewritePath("/auth/", "/api/v1/auth/")
         ).uri("lb://auth-service"))
+        //CINEMA-SERVICE ROUTING
+        .route(r -> r.path("/cinemas/**").filters(f -> f
+            .rewritePath("/cinemas", "/api/v1/cinemas")
+        ).uri("lb://cinema-service"))
         .build();
   }
 }

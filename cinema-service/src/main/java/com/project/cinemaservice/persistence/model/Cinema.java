@@ -1,13 +1,9 @@
-package com.project.userservice.persistence.model;
+package com.project.cinemaservice.persistence.model;
 
-import com.project.userservice.persistence.enums.Role;
-import com.project.userservice.persistence.enums.UserStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,7 +16,7 @@ import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
- * Represents a User entity storing user information in the database.
+ * Represents a Cinema entity storing cinema information in the database.
  */
 @Builder
 @AllArgsConstructor
@@ -28,32 +24,25 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Getter
 @Setter
 @Entity
-@Table(name = "users")
+@Table(name = "cinemas")
 @EntityListeners(AuditingEntityListener.class)
-public class User {
+public class Cinema {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id")
   private Long id;
 
-  @Column(name = "first_name")
-  private String firstName;
+  @Column(name = "name", unique = true)
+  private String name;
 
-  @Column(name = "last_name")
-  private String lastName;
+  @Column(name = "city")
+  private String city;
 
-  @Column(name = "email", unique = true)
-  private String email;
-
-  @Column(name = "role")
-  @Enumerated(EnumType.STRING)
-  private Role role;
-
-  @Column(name = "status")
-  @Enumerated(EnumType.STRING)
-  private UserStatus userStatus;
+  @Column(name = "street_address")
+  private String streetAddress;
 
   @Embedded
-  private AuditEntity auditEntity;
+  @Builder.Default
+  private AuditEntity auditEntity = new AuditEntity();
 }

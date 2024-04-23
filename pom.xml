@@ -30,6 +30,7 @@
     <module>auth-service</module>
     <module>gateway-service</module>
     <module>notification-service</module>
+    <module>cinema-service</module>
   </modules>
 
   <build>

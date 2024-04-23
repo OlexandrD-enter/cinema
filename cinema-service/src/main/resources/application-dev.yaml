@@ -1,0 +1,35 @@
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+spring:
+  config:
+    import: file:.env[.properties]
+
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: cinema_service
+
+  flyway:
+    schemas: cinema_service
+    locations: db/migration/base
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${JWK_SET_URI}
+
+jwt:
+  auth:
+    converter:
+      principle-attribute: ${PRINCIPLE_ATTRIBUTE}
