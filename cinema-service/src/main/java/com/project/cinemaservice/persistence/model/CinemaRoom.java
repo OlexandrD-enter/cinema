@@ -1,17 +1,18 @@
 package com.project.cinemaservice.persistence.model;
 
-import jakarta.persistence.CascadeType;
+import com.project.cinemaservice.persistence.enums.RoomType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.FetchType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,7 +21,7 @@ import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
- * Represents a Cinema entity storing cinema information in the database.
+ * Represents a CinemaRoom entity storing cinema rooms information in the database.
  */
 @Builder
 @AllArgsConstructor
@@ -28,26 +29,22 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Getter
 @Setter
 @Entity
-@Table(name = "cinemas")
+@Table(name = "cinema_rooms")
 @EntityListeners(AuditingEntityListener.class)
-public class Cinema {
+public class CinemaRoom {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id")
   private Long id;
 
-  @Column(name = "name", unique = true)
-  private String name;
+  @Column(name = "room_type")
+  @Enumerated(EnumType.STRING)
+  private RoomType roomType;
 
-  @Column(name = "city")
-  private String city;
-
-  @Column(name = "street_address")
-  private String streetAddress;
-
-  @OneToMany(fetch = FetchType.LAZY, mappedBy = "cinema", cascade = CascadeType.ALL)
-  private Set<CinemaRoom> cinemaRooms;
+  @ManyToOne
+  @JoinColumn(name = "cinema_id")
+  private Cinema cinema;
 
   @Embedded
   @Builder.Default
