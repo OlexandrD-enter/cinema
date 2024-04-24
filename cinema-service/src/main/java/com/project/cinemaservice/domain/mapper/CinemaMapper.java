@@ -5,7 +5,6 @@ import com.project.cinemaservice.domain.dto.cinema.CinemaDataRequest;
 import com.project.cinemaservice.domain.dto.cinemaroom.CinemaRoomBriefInfo;
 import com.project.cinemaservice.persistence.model.Cinema;
 import com.project.cinemaservice.persistence.model.CinemaRoom;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.mapstruct.Mapper;
