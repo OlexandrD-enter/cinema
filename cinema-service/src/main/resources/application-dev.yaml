@@ -18,6 +18,7 @@ spring:
     properties:
       hibernate:
         default_schema: cinema_service
+    show-sql: true
 
   flyway:
     schemas: cinema_service

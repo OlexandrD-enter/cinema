@@ -3,8 +3,8 @@ package com.project.cinemaservice.api.handler;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
-import com.project.cinemaservice.service.execption.GenericException;
 import com.project.cinemaservice.api.exception.CommonExceptionInfo;
+import com.project.cinemaservice.service.execption.GenericException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.HashMap;
 import java.util.Map;

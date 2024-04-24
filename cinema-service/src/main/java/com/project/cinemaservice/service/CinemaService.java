@@ -4,7 +4,7 @@ import com.project.cinemaservice.domain.dto.cinema.CinemaAdminResponse;
 import com.project.cinemaservice.domain.dto.cinema.CinemaDataRequest;
 
 /**
- * CinemaService interface for managing cinema related operations.
+ * CinemaService interface for managing Cinema related operations.
  */
 public interface CinemaService {
 

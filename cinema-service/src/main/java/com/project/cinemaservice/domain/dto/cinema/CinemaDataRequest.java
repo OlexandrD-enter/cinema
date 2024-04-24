@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Represents a request for create/update cinema.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

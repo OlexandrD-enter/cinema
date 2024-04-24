@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,7 +30,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Getter
 @Setter
 @Entity
-@Table(name = "cinema_rooms")
+@Table(name = "cinema_rooms",
+    uniqueConstraints = {@UniqueConstraint(columnNames = {"cinema_id", "name"})})
 @EntityListeners(AuditingEntityListener.class)
 public class CinemaRoom {
 
@@ -37,6 +39,9 @@ public class CinemaRoom {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id")
   private Long id;
+
+  @Column(name = "name")
+  private String name;
 
   @Column(name = "room_type")
   @Enumerated(EnumType.STRING)

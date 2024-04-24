@@ -20,6 +20,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Controller handling operations related to cinemas.<br>
+ * Endpoints provided:<br>
+ * - POST /: Creates a new cinema based on request data.<br>
+ * - PUT /{cinemaId}: Updates a cinema based on request data.<br>
+ * - GET /: Gets a cinema for admin.<br>
+ * - DELETE /{cinemaId}: Deletes a cinema based on request data.<br>
+ */
 @Validated
 @RestController
 @RequiredArgsConstructor
@@ -47,7 +55,7 @@ public class CinemaController {
   }
 
   @Operation(summary = "This method retrieves a cinema details.")
-  @GetMapping("{cinemaId}")
+  @GetMapping("/{cinemaId}")
   public ResponseEntity<CinemaAdminResponse> getCinema(@PathVariable @Min(1) Long cinemaId) {
     return ResponseEntity.ok(cinemaService.getCinemaById(cinemaId));
   }
