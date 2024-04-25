@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Endpoints provided:<br>
  * - POST /: Creates a new cinema based on request data.<br>
  * - PUT /{cinemaId}: Updates a cinema based on request data.<br>
- * - GET /: Gets a cinema for admin.<br>
+ * - GET /{cinemaId}: Gets a cinema for admin.<br>
  * - DELETE /{cinemaId}: Deletes a cinema based on request data.<br>
  */
 @Validated

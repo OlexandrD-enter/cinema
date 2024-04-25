@@ -1,23 +1,16 @@
 package com.project.cinemaservice.persistence.model;
 
-import com.project.cinemaservice.persistence.enums.RoomType;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,7 +19,7 @@ import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
- * Represents a CinemaRoom entity storing cinema rooms information in the database.
+ * Represents a RoomSeat entity storing room seats information in the database.
  */
 @Builder
 @AllArgsConstructor
@@ -34,29 +27,22 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Getter
 @Setter
 @Entity
-@Table(name = "cinema_rooms",
-    uniqueConstraints = {@UniqueConstraint(columnNames = {"cinema_id", "name"})})
+@Table(name = "room_seats", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"seat_number", "room_id"})})
 @EntityListeners(AuditingEntityListener.class)
-public class CinemaRoom {
+public class RoomSeat {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id")
   private Long id;
 
-  @Column(name = "name")
-  private String name;
-
-  @Column(name = "room_type")
-  @Enumerated(EnumType.STRING)
-  private RoomType roomType;
+  @Column(name = "seat_number")
+  private Long seatNumber;
 
   @ManyToOne
-  @JoinColumn(name = "cinema_id")
-  private Cinema cinema;
-
-  @OneToMany(fetch = FetchType.LAZY, mappedBy = "cinemaRoom", cascade = CascadeType.ALL)
-  private Set<RoomSeat> roomSeats;
+  @JoinColumn(name = "room_id")
+  private CinemaRoom cinemaRoom;
 
   @Embedded
   @Builder.Default

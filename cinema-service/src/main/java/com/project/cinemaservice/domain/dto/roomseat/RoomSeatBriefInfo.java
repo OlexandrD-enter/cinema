@@ -1,4 +1,4 @@
-package com.project.cinemaservice.domain.dto.cinemaroom;
+package com.project.cinemaservice.domain.dto.roomseat;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,14 +6,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Represents a cinema room brief response.
+ * Represents a room seat brief response.
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CinemaRoomBriefInfo {
+public class RoomSeatBriefInfo {
+
   private Long id;
-  private String name;
-  private String roomType;
+  private Long seatNumber;
 }

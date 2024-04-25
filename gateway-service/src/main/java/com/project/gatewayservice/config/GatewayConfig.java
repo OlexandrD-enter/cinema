@@ -35,14 +35,14 @@ public class GatewayConfig {
             .rewritePath("/auth/", "/api/v1/auth/")
         ).uri("lb://auth-service"))
         //CINEMA-SERVICE ROUTING
-        .route(r -> r.path("/cinemas/**").filters(f -> f
-            .rewritePath("/cinemas", "/api/v1/cinemas")
-        ).uri("lb://cinema-service"))
         .route(r -> r.path("/admin/cinemas/**").filters(f -> f
             .rewritePath("/admin/cinemas", "/api/v1/admin/cinemas")
         ).uri("lb://cinema-service"))
         .route(r -> r.path("/admin/cinema-rooms/**").filters(f -> f
             .rewritePath("/admin/cinema-rooms", "/api/v1/admin/cinema-rooms")
+        ).uri("lb://cinema-service"))
+        .route(r -> r.path("/admin/room-seats/**").filters(f -> f
+            .rewritePath("/admin/room-seats", "/api/v1/admin/room-seats")
         ).uri("lb://cinema-service"))
         .build();
   }
