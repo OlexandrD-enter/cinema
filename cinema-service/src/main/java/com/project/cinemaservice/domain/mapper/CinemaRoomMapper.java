@@ -6,6 +6,7 @@ import com.project.cinemaservice.domain.dto.roomseat.RoomSeatBriefInfo;
 import com.project.cinemaservice.persistence.model.Cinema;
 import com.project.cinemaservice.persistence.model.CinemaRoom;
 import com.project.cinemaservice.persistence.model.RoomSeat;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.mapstruct.Mapper;
@@ -31,15 +32,15 @@ public interface CinemaRoomMapper {
   CinemaRoomAdminResponse toCinemaRoomAdminResponse(CinemaRoom cinemaRoom);
 
   /**
-   * Maps a set of RoomSeat entities to a set of RoomSeatBriefInfo DTOs.
+   * Maps a list of RoomSeat entities to a set of RoomSeatBriefInfo DTOs.
    *
    * @param roomSeats The set of RoomSeat entities to be mapped.
    * @return The mapped set of RoomSeatBriefInfo DTOs.
    */
-  default Set<RoomSeatBriefInfo> mapRoomSeats(Set<RoomSeat> roomSeats) {
+  default List<RoomSeatBriefInfo> mapRoomSeats(List<RoomSeat> roomSeats) {
     return roomSeats.stream()
         .map(this::toRoomSeatBriefInfo)
-        .collect(Collectors.toSet());
+        .toList();
   }
 
   RoomSeatBriefInfo toRoomSeatBriefInfo(RoomSeat roomSeat);

@@ -19,18 +19,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-/**
- * Represents a Cinema entity storing cinema information in the database.
- */
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
-@Table(name = "cinemas")
+@Table(name = "genres")
 @EntityListeners(AuditingEntityListener.class)
-public class Cinema {
+public class Genre {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,14 +37,8 @@ public class Cinema {
   @Column(name = "name", unique = true)
   private String name;
 
-  @Column(name = "city")
-  private String city;
-
-  @Column(name = "street_address")
-  private String streetAddress;
-
-  @OneToMany(fetch = FetchType.LAZY, mappedBy = "cinema", cascade = CascadeType.ALL)
-  private List<CinemaRoom> cinemaRooms;
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "genre", cascade = CascadeType.ALL)
+  private List<MovieGenre> movieGenres;
 
   @Embedded
   @Builder.Default

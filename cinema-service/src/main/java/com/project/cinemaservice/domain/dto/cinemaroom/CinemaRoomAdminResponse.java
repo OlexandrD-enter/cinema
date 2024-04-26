@@ -2,7 +2,7 @@ package com.project.cinemaservice.domain.dto.cinemaroom;
 
 import com.project.cinemaservice.domain.dto.roomseat.RoomSeatBriefInfo;
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,7 +23,7 @@ public class CinemaRoomAdminResponse {
   private String name;
   private String roomType;
   private Long cinemaId;
-  private Set<RoomSeatBriefInfo> roomSeats;
+  private List<RoomSeatBriefInfo> roomSeats;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
   private String createdBy;

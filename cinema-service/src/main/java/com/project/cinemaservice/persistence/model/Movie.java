@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,18 +20,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-/**
- * Represents a Cinema entity storing cinema information in the database.
- */
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
-@Table(name = "cinemas")
+@Table(name = "movies")
 @EntityListeners(AuditingEntityListener.class)
-public class Cinema {
+public class Movie {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,14 +38,26 @@ public class Cinema {
   @Column(name = "name", unique = true)
   private String name;
 
-  @Column(name = "city")
-  private String city;
+  @Column(name = "description")
+  private String description;
 
-  @Column(name = "street_address")
-  private String streetAddress;
+  @Column(name = "age_limit")
+  private Integer ageLimit;
 
-  @OneToMany(fetch = FetchType.LAZY, mappedBy = "cinema", cascade = CascadeType.ALL)
-  private List<CinemaRoom> cinemaRooms;
+  @Column(name = "language")
+  private String language;
+
+  @Column(name = "country")
+  private String country;
+
+  @Column(name = "director")
+  private String director;
+
+  @Column(name = "realise_date")
+  private LocalDateTime realiseDate;
+
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "movie", cascade = CascadeType.ALL)
+  private List<MovieGenre> movieGenres;
 
   @Embedded
   @Builder.Default

@@ -17,6 +17,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.util.List;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -56,7 +57,7 @@ public class CinemaRoom {
   private Cinema cinema;
 
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "cinemaRoom", cascade = CascadeType.ALL)
-  private Set<RoomSeat> roomSeats;
+  private List<RoomSeat> roomSeats;
 
   @Embedded
   @Builder.Default
