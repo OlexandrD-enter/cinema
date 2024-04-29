@@ -17,6 +17,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+/**
+ * Represents a MovieGenre entity storing information about movie genres in the database.
+ */
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

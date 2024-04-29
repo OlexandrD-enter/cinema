@@ -1,18 +1,18 @@
 package com.project.cinemaservice.persistence.model;
 
-import jakarta.persistence.CascadeType;
+import com.project.cinemaservice.persistence.enums.MovieFileType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.FetchType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,7 +21,7 @@ import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
- * Represents a Movie entity storing movie information in the database.
+ * Represents a MovieFile entity storing information about movie files in the database.
  */
 @Builder
 @AllArgsConstructor
@@ -29,38 +29,25 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Getter
 @Setter
 @Entity
-@Table(name = "movies")
+@Table(name = "movie_files")
 @EntityListeners(AuditingEntityListener.class)
-public class Movie {
+public class MovieFile {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id")
   private Long id;
 
-  @Column(name = "name", unique = true)
-  private String name;
+  @ManyToOne
+  @JoinColumn(name = "movie_id")
+  private Movie movie;
 
-  @Column(name = "description")
-  private String description;
+  @Column(name = "file_id")
+  private Long fileId;
 
-  @Column(name = "age_limit")
-  private Integer ageLimit;
-
-  @Column(name = "language")
-  private String language;
-
-  @Column(name = "country")
-  private String country;
-
-  @Column(name = "director")
-  private String director;
-
-  @Column(name = "realise_date")
-  private LocalDateTime realiseDate;
-
-  @OneToMany(fetch = FetchType.LAZY, mappedBy = "movie", cascade = CascadeType.ALL)
-  private List<MovieGenre> movieGenres;
+  @Column(name = "file_type")
+  @Enumerated(EnumType.STRING)
+  private MovieFileType movieFileType;
 
   @Embedded
   @Builder.Default

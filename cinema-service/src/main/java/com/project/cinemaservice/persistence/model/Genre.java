@@ -19,6 +19,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+/**
+ * Represents a Genre entity storing genre information in the database.
+ */
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
