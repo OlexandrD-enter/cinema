@@ -21,6 +21,16 @@ public class GenreAdminResponse extends GenreAdminBriefResponse {
   private String createdBy;
   private String modifiedBy;
 
+  /**
+   * Constructor with builder.
+   *
+   * @param id         The genre ID.
+   * @param name       The genre name.
+   * @param createdAt  The date and time when the genre was created.
+   * @param updatedAt  The date and time when the genre was last updated.
+   * @param createdBy  The email of the user who created the genre.
+   * @param modifiedBy The email of the user who last modified the genre.
+   */
   @Builder(builderMethodName = "builder")
   public GenreAdminResponse(Long id, String name, LocalDateTime createdAt, LocalDateTime updatedAt,
       String createdBy, String modifiedBy) {

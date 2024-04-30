@@ -30,7 +30,17 @@ spring:
         jwt:
           jwk-set-uri: ${JWK_SET_URI}
 
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 10KB
+      max-file-size: 20MB
+      max-request-size: 50MB
+
 jwt:
   auth:
     converter:
       principle-attribute: ${PRINCIPLE_ATTRIBUTE}
+
+media-service:
+  url: ${MEDIA_SERVICE_URL}

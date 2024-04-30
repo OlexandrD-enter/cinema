@@ -11,6 +11,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * CinemaService implementation responsible for cinema related operations.
@@ -23,6 +24,7 @@ public class CinemaServiceImpl implements CinemaService {
   private final CinemaRepository cinemaRepository;
   private final CinemaMapper cinemaMapper;
 
+  @Transactional
   @Override
   public CinemaAdminResponse createCinema(CinemaDataRequest cinemaDataRequest) {
     String cinemaName = cinemaDataRequest.getName();
@@ -38,6 +40,7 @@ public class CinemaServiceImpl implements CinemaService {
     return cinemaMapper.toCinemaAdminResponse(savedCinema);
   }
 
+  @Transactional
   @Override
   public CinemaAdminResponse editCinema(Long cinemaId, CinemaDataRequest cinemaDataRequest) {
     String cinemaName = cinemaDataRequest.getName();
@@ -58,6 +61,7 @@ public class CinemaServiceImpl implements CinemaService {
     return cinemaMapper.toCinemaAdminResponse(savedCinema);
   }
 
+  @Transactional
   @Override
   public void deleteCinemaById(Long cinemaId) {
     log.debug("Trying to delete cinema with id {}", cinemaId);
@@ -69,6 +73,7 @@ public class CinemaServiceImpl implements CinemaService {
     log.debug("Deleted cinema with id {}", cinemaId);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public CinemaAdminResponse getCinemaById(Long cinemaId) {
     Cinema cinema = findCinemaEntityById(cinemaId);

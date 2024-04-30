@@ -11,7 +11,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.util.MimeType;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Represents a request for creating a new file entity.
@@ -37,7 +36,4 @@ public class FileRequest {
   @Schema(example = "image/jpeg")
   @NotNull(message = "Not valid mimeType")
   private MimeType mimeType;
-
-  @NotNull(message = "Not valid file")
-  MultipartFile file;
 }

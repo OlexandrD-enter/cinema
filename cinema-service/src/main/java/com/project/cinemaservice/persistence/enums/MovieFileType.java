@@ -6,5 +6,5 @@ package com.project.cinemaservice.persistence.enums;
 public enum MovieFileType {
 
   MOVIE_PREVIEW,
-  MOVIE_TRAILER;
+  MOVIE_TRAILER
 }

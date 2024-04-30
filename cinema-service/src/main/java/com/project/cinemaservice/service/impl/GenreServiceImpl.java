@@ -13,6 +13,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * GenreService implementation responsible for genre related operations.
@@ -25,6 +26,7 @@ public class GenreServiceImpl implements GenreService {
   private final GenreRepository genreRepository;
   private final GenreMapper genreMapper;
 
+  @Transactional
   @Override
   public GenreAdminResponse createCinema(GenreDataRequest genreDataRequest) {
     String genreName = genreDataRequest.getName();
@@ -40,6 +42,7 @@ public class GenreServiceImpl implements GenreService {
     return genreMapper.toGenreAdminResponse(savedCinema);
   }
 
+  @Transactional
   @Override
   public GenreAdminResponse editCinema(Long genreId, GenreDataRequest genreDataRequest) {
     String genreName = genreDataRequest.getName();
@@ -58,6 +61,7 @@ public class GenreServiceImpl implements GenreService {
     return genreMapper.toGenreAdminResponse(savedGenre);
   }
 
+  @Transactional
   @Override
   public void deleteGenreById(Long genreId) {
     log.debug("Trying to delete genre with id {}", genreId);
@@ -69,6 +73,7 @@ public class GenreServiceImpl implements GenreService {
     log.debug("Deleted genre with id {}", genreId);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public GenreAdminResponse getGenreById(Long genreId) {
     Genre genre = findGenreEntityById(genreId);
@@ -76,6 +81,7 @@ public class GenreServiceImpl implements GenreService {
     return genreMapper.toGenreAdminResponse(genre);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public List<GenreAdminBriefResponse> getGenres() {
     return genreRepository.findAll().stream()

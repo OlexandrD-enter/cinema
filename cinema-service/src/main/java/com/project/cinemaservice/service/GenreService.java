@@ -5,6 +5,9 @@ import com.project.cinemaservice.domain.dto.genre.GenreAdminResponse;
 import com.project.cinemaservice.domain.dto.genre.GenreDataRequest;
 import java.util.List;
 
+/**
+ * GenreService interface for managing Genre related operations.
+ */
 public interface GenreService {
 
   GenreAdminResponse createCinema(GenreDataRequest genreDataRequest);

@@ -2,6 +2,9 @@ package com.project.cinemaservice.service.execption;
 
 import org.springframework.http.HttpStatus;
 
+/**
+ * Represents an exception specific to genre create/update operations. Extends GenericException.
+ */
 public class GenreAlreadyExistsException extends GenericException {
 
   public GenreAlreadyExistsException(String message) {

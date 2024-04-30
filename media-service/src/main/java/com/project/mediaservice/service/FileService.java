@@ -3,14 +3,14 @@ package com.project.mediaservice.service;
 import com.project.mediaservice.domain.dto.FileRequest;
 import com.project.mediaservice.domain.dto.FileResponse;
 import com.project.mediaservice.persistence.model.FileEntity;
-import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * FileService interface for operations with files.
  */
 public interface FileService {
 
-  List<FileEntity> save(List<FileRequest> fileRequest);
+  FileEntity save(FileRequest fileRequest, MultipartFile multipartFile);
 
   void deleteById(Long id);
 

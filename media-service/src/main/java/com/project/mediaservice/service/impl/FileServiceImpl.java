@@ -9,11 +9,11 @@ import com.project.mediaservice.persistence.repository.FileRepository;
 import com.project.mediaservice.service.AmazonS3Client;
 import com.project.mediaservice.service.FileService;
 import jakarta.persistence.EntityNotFoundException;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * FileService implementation responsible for operations with files.
@@ -29,22 +29,21 @@ public class FileServiceImpl implements FileService {
 
   @Transactional
   @Override
-  public List<FileEntity> save(List<FileRequest> fileRequestList) {
-    List<FileToS3Upload> filesToS3Upload = fileMapper.toS3Files(fileRequestList);
-    List<String> uploadedToAwsFilesNames = filesToS3Upload.stream()
-        .map(FileToS3Upload::getName)
-        .toList();
-    List<FileEntity> files = fileMapper.toEntities(fileRequestList, uploadedToAwsFilesNames);
+  public FileEntity save(FileRequest fileRequest, MultipartFile multipartFile) {
+    FileToS3Upload filesToS3Upload = fileMapper.toS3File(fileRequest, multipartFile);
+    String uploadedToAwsFilesName = filesToS3Upload.getName();
+
+    FileEntity file = fileMapper.toEntity(fileRequest, uploadedToAwsFilesName);
 
     log.debug("Trying to save new files into db");
-    fileRepository.saveAll(files);
+    fileRepository.save(file);
     log.debug("Files are saved to database");
 
     log.debug("Trying to save new files into bucket");
-    filesToS3Upload.forEach(amazonS3Client::uploadFileToBucket);
+    amazonS3Client.uploadFileToBucket(filesToS3Upload);
     log.debug("Files are saved to bucket");
 
-    return files;
+    return file;
   }
 
   @Transactional

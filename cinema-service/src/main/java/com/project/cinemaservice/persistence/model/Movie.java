@@ -62,6 +62,9 @@ public class Movie {
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "movie", cascade = CascadeType.ALL)
   private List<MovieGenre> movieGenres;
 
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "movie", cascade = CascadeType.ALL)
+  private List<MovieFile> movieFiles;
+
   @Embedded
   @Builder.Default
   private AuditEntity auditEntity = new AuditEntity();

@@ -14,6 +14,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * RoomSeatService implementation responsible for room seats related operations.
@@ -27,6 +28,7 @@ public class RoomSeatServiceImpl implements RoomSeatService {
   private final CinemaRoomRepository cinemaRoomRepository;
   private final RoomSeatMapper roomSeatMapper;
 
+  @Transactional
   @Override
   public RoomSeatAdminResponse createRoomSeat(RoomSeatCreateRequest roomSeatDataRequest) {
     Long seatNumber = roomSeatDataRequest.getSeatNumber();
@@ -46,6 +48,7 @@ public class RoomSeatServiceImpl implements RoomSeatService {
     return roomSeatMapper.toRoomSeatAdminResponse(savedRoomSeat);
   }
 
+  @Transactional
   @Override
   public RoomSeatAdminResponse editRoomSeat(Long roomSeatId,
       RoomSeatEditRequest roomSeatEditRequest) {
@@ -61,6 +64,7 @@ public class RoomSeatServiceImpl implements RoomSeatService {
     return roomSeatMapper.toRoomSeatAdminResponse(savedRoomSeat);
   }
 
+  @Transactional
   @Override
   public void deleteRoomSeatById(Long roomSeatId) {
     log.debug("Trying to delete RoomSeat with id {}", roomSeatId);
@@ -72,6 +76,7 @@ public class RoomSeatServiceImpl implements RoomSeatService {
     log.debug("Deleted RoomSeat with id {}", roomSeatId);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public RoomSeatAdminResponse getRoomSeatById(Long roomSeatId) {
     RoomSeat roomSeat = findRoomSeatEntityById(roomSeatId);

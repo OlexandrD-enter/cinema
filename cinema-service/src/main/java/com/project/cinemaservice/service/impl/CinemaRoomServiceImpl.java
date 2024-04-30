@@ -15,6 +15,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * CinemaRoomService implementation responsible for CinemaRoom related operations.
@@ -28,6 +29,7 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
   private final CinemaRepository cinemaRepository;
   private final CinemaRoomMapper cinemaRoomMapper;
 
+  @Transactional
   @Override
   public CinemaRoomAdminResponse createCinemaRoom(CinemaRoomCreateRequest cinemaRoomCreateRequest) {
     String cinemaRoomName = cinemaRoomCreateRequest.getName();
@@ -47,6 +49,7 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
     return cinemaRoomMapper.toCinemaRoomAdminResponse(savedCinemaRoom);
   }
 
+  @Transactional
   @Override
   public CinemaRoomAdminResponse editCinemaRoom(Long roomId,
       CinemaRoomEditRequest cinemaRoomEditRequest) {
@@ -63,6 +66,7 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
     return cinemaRoomMapper.toCinemaRoomAdminResponse(savedCinemaRoom);
   }
 
+  @Transactional
   @Override
   public void deleteCinemaRoomById(Long cinemaRoomId) {
     log.debug("Trying to delete cinemaRoom with id {}", cinemaRoomId);
@@ -74,6 +78,7 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
     log.debug("Deleted cinemaRoom with id {}", cinemaRoom);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public CinemaRoomAdminResponse getCinemaRoomById(Long cinemaRoomId) {
     CinemaRoom cinemaRoom = findCinemaRoomEntityById(cinemaRoomId);
