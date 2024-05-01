@@ -9,18 +9,18 @@ import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Represents a request for create movie.
+ * Represents a request for create/edit movie.
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MovieDataRequest {
+public class MovieEditRequest {
 
   /*  @Schema(example = "STALKER 2")
-    @NotNull(message = "Not valid name")
-    @Pattern(regexp = "^[a-zA-Z0-9,./ ]{2,50}$",
-        message = "Not valid name, length [2,50]")*/
+     @NotNull(message = "Not valid name")
+     @Pattern(regexp = "^[a-zA-Z0-9,./ ]{2,50}$",
+         message = "Not valid name, length [2,50]")*/
   private String name;
   /* @Schema(example = "Short description of movie")
    @NotNull(message = "Not valid description")
@@ -54,10 +54,8 @@ public class MovieDataRequest {
   /* @Schema(example = "[1, 2, 3]")
    @NotNull(message = "Not valid movieGenreIds")*/
   private List<Long> movieGenreIds;
-  /*@Schema(example = "previewImage.jpeg")
-  @NotNull(message = "Not valid previewImage")*/
+  /*@Schema(example = "previewImage.jpeg")*/
   private MultipartFile previewImage;
-  /* @Schema(example = "trailerVideo.mp4")
-   @NotNull(message = "Not valid trailerVideo")*/
+  /* @Schema(example = "trailerVideo.mp4")*/
   private MultipartFile trailerVideo;
 }

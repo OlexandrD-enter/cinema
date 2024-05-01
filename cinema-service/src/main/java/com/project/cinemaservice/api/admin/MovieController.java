@@ -2,6 +2,7 @@ package com.project.cinemaservice.api.admin;
 
 import com.project.cinemaservice.domain.dto.movie.MovieAdminResponse;
 import com.project.cinemaservice.domain.dto.movie.MovieDataRequest;
+import com.project.cinemaservice.domain.dto.movie.MovieEditRequest;
 import com.project.cinemaservice.service.MovieService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -43,7 +44,7 @@ public class MovieController {
   @PutMapping("/{movieId}")
   public ResponseEntity<MovieAdminResponse> editMovie(
       @PathVariable Long movieId,
-      @ModelAttribute @Valid MovieDataRequest movieEditRequest) {
+      @ModelAttribute @Valid MovieEditRequest movieEditRequest) {
     return ResponseEntity.ok().body(movieService.editMovie(movieId, movieEditRequest));
   }
 }

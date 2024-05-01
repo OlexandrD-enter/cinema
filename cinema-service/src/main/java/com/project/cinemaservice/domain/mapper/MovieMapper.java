@@ -3,6 +3,7 @@ package com.project.cinemaservice.domain.mapper;
 import com.project.cinemaservice.domain.dto.movie.MovieAdminResponse;
 import com.project.cinemaservice.domain.dto.movie.MovieClientResponse;
 import com.project.cinemaservice.domain.dto.movie.MovieDataRequest;
+import com.project.cinemaservice.domain.dto.movie.MovieEditRequest;
 import com.project.cinemaservice.persistence.model.Genre;
 import com.project.cinemaservice.persistence.model.Movie;
 import com.project.cinemaservice.persistence.model.MovieGenre;
@@ -20,15 +21,15 @@ public interface MovieMapper {
 
   Movie toMovieEntity(MovieDataRequest movieDataRequest);
 
-  @Mapping(source = "auditEntity.createdAt", target = "createdAt")
-  @Mapping(source = "auditEntity.updatedAt", target = "updatedAt")
-  @Mapping(source = "auditEntity.createdBy", target = "createdBy")
-  @Mapping(source = "auditEntity.modifiedBy", target = "modifiedBy")
-  MovieAdminResponse toMovieAdminResponse(Movie movie);
+  @Mapping(source = "movie.auditEntity.createdAt", target = "createdAt")
+  @Mapping(source = "movie.auditEntity.updatedAt", target = "updatedAt")
+  @Mapping(source = "movie.auditEntity.createdBy", target = "createdBy")
+  @Mapping(source = "movie.auditEntity.modifiedBy", target = "modifiedBy")
+  MovieAdminResponse toMovieAdminResponse(Movie movie, String previewUrl, String trailerUrl);
 
   MovieClientResponse toMovieClientResponse(Movie movie);
 
-  void updateEntity(@MappingTarget Movie movie, MovieDataRequest movieDataRequest);
+  void updateEntity(@MappingTarget Movie movie, MovieEditRequest movieEditRequest);
 
   /**
    * Maps a list of MovieGenre entities to a list of genre names.

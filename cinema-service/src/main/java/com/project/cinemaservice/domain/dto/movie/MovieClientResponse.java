@@ -24,4 +24,6 @@ public class MovieClientResponse {
   private String director;
   private LocalDateTime realiseDate;
   private List<String> movieGenres;
+  private String previewUrl;
+  private String trailerUrl;
 }

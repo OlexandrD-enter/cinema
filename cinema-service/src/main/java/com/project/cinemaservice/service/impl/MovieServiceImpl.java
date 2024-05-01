@@ -2,6 +2,7 @@ package com.project.cinemaservice.service.impl;
 
 import com.project.cinemaservice.domain.dto.movie.MovieAdminResponse;
 import com.project.cinemaservice.domain.dto.movie.MovieDataRequest;
+import com.project.cinemaservice.domain.dto.movie.MovieEditRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieFileRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieFileResponse;
 import com.project.cinemaservice.domain.mapper.MovieMapper;
@@ -55,41 +56,62 @@ public class MovieServiceImpl implements MovieService {
     Movie movie = createMovieEntity(movieDataRequest);
 
     saveMovieGenres(movie, movieDataRequest.getMovieGenreIds());
-    saveMovieFiles(movie, movieDataRequest);
+
+    MovieFile previewMovieFile = saveMovieFile(movie, MovieFileType.MOVIE_PREVIEW,
+        movieDataRequest.getPreviewImage());
+    MovieFile trailerMovieFile = saveMovieFile(movie, MovieFileType.MOVIE_TRAILER,
+        movieDataRequest.getTrailerVideo());
+
+    movie.setMovieFiles(List.of(previewMovieFile, trailerMovieFile));
+
+    String previewFileUrl = getFileAccessUrl(previewMovieFile.getFileId());
+    String trailerFileUrl = getFileAccessUrl(trailerMovieFile.getFileId());
 
     log.debug("Movie created successfully with name {}", movieName);
 
-    return movieMapper.toMovieAdminResponse(movie);
+    return movieMapper.toMovieAdminResponse(movie, previewFileUrl, trailerFileUrl);
   }
 
   @Transactional
   @Override
-  public MovieAdminResponse editMovie(Long movieId, MovieDataRequest movieDataRequest) {
-    String movieName = movieDataRequest.getName();
+  public MovieAdminResponse editMovie(Long movieId, MovieEditRequest movieEditRequest) {
+    String movieName = movieEditRequest.getName();
 
     log.debug("Updating movie with id {}", movieId);
 
     checkIfMovieExistByNameForEdit(movieName, movieId);
     Movie movie = getMovieEntityById(movieId);
 
-    movieMapper.updateEntity(movie, movieDataRequest);
+    movieMapper.updateEntity(movie, movieEditRequest);
 
-    updateMovieGenres(movie, movieDataRequest.getMovieGenreIds());
+    updateMovieGenres(movie, movieEditRequest.getMovieGenreIds());
 
-    if (movieDataRequest.getPreviewImage() != null) {
-      updateMovieImageByType(movie, MovieFileType.MOVIE_PREVIEW,
-          movieDataRequest.getPreviewImage());
+    if (movieEditRequest.getPreviewImage() != null) {
+      updateMovieFileByType(movie, MovieFileType.MOVIE_PREVIEW,
+          movieEditRequest.getPreviewImage());
     }
-    if (movieDataRequest.getTrailerVideo() != null) {
-      updateMovieImageByType(movie, MovieFileType.MOVIE_TRAILER,
-          movieDataRequest.getTrailerVideo());
+
+    if (movieEditRequest.getTrailerVideo() != null) {
+      updateMovieFileByType(movie, MovieFileType.MOVIE_TRAILER,
+          movieEditRequest.getTrailerVideo());
     }
 
     Movie updatedMovie = movieRepository.save(movie);
 
+    String previewFileUrl = null;
+    String trailerFileUrl = null;
+
+    for (MovieFile movieFile : updatedMovie.getMovieFiles()) {
+      if (movieFile.getMovieFileType().equals(MovieFileType.MOVIE_PREVIEW)) {
+        previewFileUrl = getFileAccessUrl(movieFile.getFileId());
+      } else {
+        trailerFileUrl = getFileAccessUrl(movieFile.getFileId());
+      }
+    }
+
     log.debug("Movie updated successfully with id {}", movieId);
 
-    return movieMapper.toMovieAdminResponse(updatedMovie);
+    return movieMapper.toMovieAdminResponse(updatedMovie, previewFileUrl, trailerFileUrl);
   }
 
   private Movie getMovieEntityById(Long movieId) {
@@ -128,28 +150,18 @@ public class MovieServiceImpl implements MovieService {
     movie.setMovieGenres(movieGenres);
   }
 
-  private void saveMovieFiles(Movie movie, MovieDataRequest movieDataRequest) {
+  private MovieFile saveMovieFile(Movie movie, MovieFileType movieFileType, MultipartFile file) {
     MovieFileRequest previewFile = createMovieFileRequest(movie.getId(),
-        MovieFileType.MOVIE_PREVIEW,
-        movieDataRequest.getPreviewImage());
+        movieFileType,
+        file);
 
-    MovieFileResponse previewFileResponse = mediaServiceClient.uploadFile(previewFile,
-        movieDataRequest.getPreviewImage());
+    MovieFileResponse movieFileResponse = mediaServiceClient.uploadFile(previewFile,
+        file);
 
-    MovieFileRequest trailerFile = createMovieFileRequest(movie.getId(),
-        MovieFileType.MOVIE_TRAILER,
-        movieDataRequest.getTrailerVideo());
-
-    MovieFileResponse trailerFileResponse = mediaServiceClient.uploadFile(trailerFile,
-        movieDataRequest.getTrailerVideo());
-
-    MovieFile movieFilePreview = createMovieFile(movie, previewFileResponse);
-    MovieFile movieFileTrailer = createMovieFile(movie, trailerFileResponse);
-
-    movie.setMovieFiles(List.of(movieFilePreview, movieFileTrailer));
+    return createMovieFile(movie, movieFileResponse);
   }
 
-  private MovieFile updateMovieImageByType(Movie movie, MovieFileType movieFileType,
+  private MovieFile updateMovieFileByType(Movie movie, MovieFileType movieFileType,
       MultipartFile previewImage) {
 
     MovieFile moviePreviewFile = movieFileRepository.findByMovieAndMovieFileType(movie,
@@ -222,5 +234,9 @@ public class MovieServiceImpl implements MovieService {
         .fileId(fileResponse.getId())
         .movie(movie)
         .build();
+  }
+
+  private String getFileAccessUrl(Long fileId) {
+    return mediaServiceClient.getFile(fileId).getAccessUrl();
   }
 }

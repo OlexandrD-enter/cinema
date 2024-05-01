@@ -2,6 +2,7 @@ package com.project.cinemaservice.service;
 
 import com.project.cinemaservice.domain.dto.movie.MovieFileRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieFileResponse;
+import com.project.cinemaservice.domain.dto.movie.MovieFileResponseUrl;
 import com.project.cinemaservice.service.exception.FileConvertException;
 import com.project.cinemaservice.service.exception.MediaServiceException;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 /**
  * Service class responsible for interacting with the media service.
@@ -56,6 +58,8 @@ public class MediaServiceClient {
         .bodyToMono(MovieFileResponse.class)
         .onErrorMap(WebClientRequestException.class,
             e -> new MediaServiceException("Media service call exception"))
+        .onErrorMap(WebClientResponseException.class,
+            e -> new MediaServiceException("Media service call exception"))
         .blockOptional()
         .orElseThrow(() -> new MediaServiceException("Media service call exception"));
   }
@@ -73,6 +77,28 @@ public class MediaServiceClient {
         .bodyToMono(Void.class)
         .onErrorMap(WebClientRequestException.class,
             e -> new MediaServiceException("Media service call exception"))
+        .onErrorMap(WebClientResponseException.class,
+            e -> new MediaServiceException("Media service call exception"))
         .block();
+  }
+
+  /**
+   * Retrieves a file from the media service by its ID.
+   *
+   * @param fileId The ID of the file to retrieve
+   * @return The response containing the file URL
+   * @throws MediaServiceException If an exception occurs during the media service call
+   */
+  public MovieFileResponseUrl getFile(Long fileId) {
+    return mediaWebClient.get()
+        .uri("/api/v1/admin/files/{fileId}", fileId)
+        .retrieve()
+        .bodyToMono(MovieFileResponseUrl.class)
+        .onErrorMap(WebClientRequestException.class,
+            e -> new MediaServiceException("Media service call exception"))
+        .onErrorMap(WebClientResponseException.class,
+            e -> new MediaServiceException("Media service call exception"))
+        .blockOptional()
+        .orElseThrow(() -> new MediaServiceException("Media service call exception"));
   }
 }
