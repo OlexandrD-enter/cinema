@@ -2,8 +2,8 @@ package com.project.cinemaservice.service;
 
 import com.project.cinemaservice.domain.dto.movie.MovieFileRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieFileResponse;
-import com.project.cinemaservice.service.execption.FileConvertException;
-import com.project.cinemaservice.service.execption.MediaServiceException;
+import com.project.cinemaservice.service.exception.FileConvertException;
+import com.project.cinemaservice.service.exception.MediaServiceException;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
@@ -58,5 +58,21 @@ public class MediaServiceClient {
             e -> new MediaServiceException("Media service call exception"))
         .blockOptional()
         .orElseThrow(() -> new MediaServiceException("Media service call exception"));
+  }
+
+  /**
+   * Deletes a file from the media service by its ID.
+   *
+   * @param fileId The ID of the file to delete
+   * @throws MediaServiceException If an exception occurs during the media service call
+   */
+  public void deleteFileById(Long fileId) {
+    mediaWebClient.delete()
+        .uri("/api/v1/admin/files/{fileId}", fileId)
+        .retrieve()
+        .bodyToMono(Void.class)
+        .onErrorMap(WebClientRequestException.class,
+            e -> new MediaServiceException("Media service call exception"))
+        .block();
   }
 }

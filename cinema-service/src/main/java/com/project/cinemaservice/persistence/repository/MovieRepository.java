@@ -12,4 +12,6 @@ import org.springframework.stereotype.Repository;
 public interface MovieRepository extends JpaRepository<Movie, Long> {
 
   Optional<Movie> findByName(String movieName);
+
+  boolean existsByNameAndIdNot(String movieName, Long movieId);
 }

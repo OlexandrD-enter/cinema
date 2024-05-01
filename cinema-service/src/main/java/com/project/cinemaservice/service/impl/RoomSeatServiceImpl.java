@@ -9,7 +9,7 @@ import com.project.cinemaservice.persistence.model.RoomSeat;
 import com.project.cinemaservice.persistence.repository.CinemaRoomRepository;
 import com.project.cinemaservice.persistence.repository.RoomSeatRepository;
 import com.project.cinemaservice.service.RoomSeatService;
-import com.project.cinemaservice.service.execption.SeatNumberAlreadyExistsException;
+import com.project.cinemaservice.service.exception.SeatNumberAlreadyExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

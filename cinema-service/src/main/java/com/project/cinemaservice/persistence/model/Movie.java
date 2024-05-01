@@ -13,6 +13,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -68,4 +69,8 @@ public class Movie {
   @Embedded
   @Builder.Default
   private AuditEntity auditEntity = new AuditEntity();
+
+  public void removeGenreEntityFromEntitiesListByGenreId(Long id) {
+    movieGenres.removeIf(genre -> Objects.equals(genre.getGenre().getId(), id));
+  }
 }

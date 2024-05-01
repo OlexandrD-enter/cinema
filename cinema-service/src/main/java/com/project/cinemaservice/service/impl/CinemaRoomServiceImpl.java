@@ -10,7 +10,7 @@ import com.project.cinemaservice.persistence.model.CinemaRoom;
 import com.project.cinemaservice.persistence.repository.CinemaRepository;
 import com.project.cinemaservice.persistence.repository.CinemaRoomRepository;
 import com.project.cinemaservice.service.CinemaRoomService;
-import com.project.cinemaservice.service.execption.CinemaRoomAlreadyExistsException;
+import com.project.cinemaservice.service.exception.CinemaRoomAlreadyExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

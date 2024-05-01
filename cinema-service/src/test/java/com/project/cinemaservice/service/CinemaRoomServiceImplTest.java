@@ -15,7 +15,7 @@ import com.project.cinemaservice.persistence.model.Cinema;
 import com.project.cinemaservice.persistence.model.CinemaRoom;
 import com.project.cinemaservice.persistence.repository.CinemaRepository;
 import com.project.cinemaservice.persistence.repository.CinemaRoomRepository;
-import com.project.cinemaservice.service.execption.CinemaRoomAlreadyExistsException;
+import com.project.cinemaservice.service.exception.CinemaRoomAlreadyExistsException;
 import com.project.cinemaservice.service.impl.CinemaRoomServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Optional;

@@ -1,7 +1,6 @@
 package com.project.cinemaservice.domain.dto.movie;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,17 +13,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MovieAdminResponse {
+public class MovieAdminResponse extends MovieClientResponse {
 
-  private Long id;
-  private String name;
-  private String description;
-  private Integer ageLimit;
-  private String language;
-  private String country;
-  private String director;
-  private LocalDateTime realiseDate;
-  private List<String> movieGenres;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
   private String createdBy;

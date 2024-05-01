@@ -1,4 +1,4 @@
-package com.project.cinemaservice.service.execption;
+package com.project.cinemaservice.service.exception;
 
 import org.springframework.http.HttpStatus;
 

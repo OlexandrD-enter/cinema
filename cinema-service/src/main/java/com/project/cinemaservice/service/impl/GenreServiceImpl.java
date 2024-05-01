@@ -7,7 +7,7 @@ import com.project.cinemaservice.domain.mapper.GenreMapper;
 import com.project.cinemaservice.persistence.model.Genre;
 import com.project.cinemaservice.persistence.repository.GenreRepository;
 import com.project.cinemaservice.service.GenreService;
-import com.project.cinemaservice.service.execption.GenreAlreadyExistsException;
+import com.project.cinemaservice.service.exception.GenreAlreadyExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
