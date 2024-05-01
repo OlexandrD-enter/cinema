@@ -2,6 +2,7 @@ package com.project.cinemaservice.persistence.repository;
 
 import com.project.cinemaservice.persistence.model.Movie;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,6 +13,9 @@ import org.springframework.stereotype.Repository;
 public interface MovieRepository extends JpaRepository<Movie, Long> {
 
   Optional<Movie> findByName(String movieName);
+
+  @EntityGraph(attributePaths = {"movieGenres", "movieFiles"})
+  Optional<Movie> findById(Long movieId);
 
   boolean existsByNameAndIdNot(String movieName, Long movieId);
 }

@@ -21,7 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfiguration {
 
   private static final String[] AUTH_WHITELIST = {
-
+      "/api/v1/movies/**"
   };
 
   private final JwtAuthConverter jwtAuthConverter;

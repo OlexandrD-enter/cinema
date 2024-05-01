@@ -1,6 +1,7 @@
 package com.project.cinemaservice.service.impl;
 
 import com.project.cinemaservice.domain.dto.movie.MovieAdminResponse;
+import com.project.cinemaservice.domain.dto.movie.MovieClientResponse;
 import com.project.cinemaservice.domain.dto.movie.MovieDataRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieEditRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieFileRequest;
@@ -98,20 +99,34 @@ public class MovieServiceImpl implements MovieService {
 
     Movie updatedMovie = movieRepository.save(movie);
 
-    String previewFileUrl = null;
-    String trailerFileUrl = null;
-
-    for (MovieFile movieFile : updatedMovie.getMovieFiles()) {
-      if (movieFile.getMovieFileType().equals(MovieFileType.MOVIE_PREVIEW)) {
-        previewFileUrl = getFileAccessUrl(movieFile.getFileId());
-      } else {
-        trailerFileUrl = getFileAccessUrl(movieFile.getFileId());
-      }
-    }
+    String previewFileUrl = getFileUrlByType(movie, MovieFileType.MOVIE_PREVIEW);
+    String trailerFileUrl = getFileUrlByType(movie, MovieFileType.MOVIE_TRAILER);
 
     log.debug("Movie updated successfully with id {}", movieId);
 
     return movieMapper.toMovieAdminResponse(updatedMovie, previewFileUrl, trailerFileUrl);
+  }
+
+  @Transactional
+  @Override
+  public MovieAdminResponse getMovieForAdminById(Long movieId) {
+    Movie movie = getMovieEntityById(movieId);
+
+    String previewFileUrl = getFileUrlByType(movie, MovieFileType.MOVIE_PREVIEW);
+    String trailerFileUrl = getFileUrlByType(movie, MovieFileType.MOVIE_TRAILER);
+
+    return movieMapper.toMovieAdminResponse(movie, previewFileUrl, trailerFileUrl);
+  }
+
+  @Transactional
+  @Override
+  public MovieClientResponse getMovieForClientById(Long movieId) {
+    Movie movie = getMovieEntityById(movieId);
+
+    String previewFileUrl = getFileUrlByType(movie, MovieFileType.MOVIE_PREVIEW);
+    String trailerFileUrl = getFileUrlByType(movie, MovieFileType.MOVIE_TRAILER);
+
+    return movieMapper.toMovieClientResponse(movie, previewFileUrl, trailerFileUrl);
   }
 
   private Movie getMovieEntityById(Long movieId) {
@@ -234,6 +249,15 @@ public class MovieServiceImpl implements MovieService {
         .fileId(fileResponse.getId())
         .movie(movie)
         .build();
+  }
+
+  private String getFileUrlByType(Movie movie, MovieFileType fileType) {
+    for (MovieFile movieFile : movie.getMovieFiles()) {
+      if (movieFile.getMovieFileType().equals(fileType)) {
+        return getFileAccessUrl(movieFile.getFileId());
+      }
+    }
+    return null;
   }
 
   private String getFileAccessUrl(Long fileId) {

@@ -32,12 +32,12 @@ import org.springframework.web.multipart.MultipartFile;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
-@RequestMapping("/api/v1/admin/files")
+@RequestMapping("/api/v1/files")
 public class FileController {
 
   private final FileService fileService;
 
+  @PreAuthorize("hasRole('ADMIN')")
   @Operation(summary = "This method is used for file entity creation.")
   @PostMapping(consumes = MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<FileEntity> createFileEntity(
@@ -53,6 +53,7 @@ public class FileController {
     return ResponseEntity.ok(fileService.getById(fileId));
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @Operation(summary = "This method is used to delete the file.")
   @DeleteMapping("/{fileId}")
   public ResponseEntity<HttpStatus> deleteFile(@PathVariable @Min(1) Long fileId) {

@@ -27,7 +27,7 @@ public interface MovieMapper {
   @Mapping(source = "movie.auditEntity.modifiedBy", target = "modifiedBy")
   MovieAdminResponse toMovieAdminResponse(Movie movie, String previewUrl, String trailerUrl);
 
-  MovieClientResponse toMovieClientResponse(Movie movie);
+  MovieClientResponse toMovieClientResponse(Movie movie, String previewUrl, String trailerUrl);
 
   void updateEntity(@MappingTarget Movie movie, MovieEditRequest movieEditRequest);
 

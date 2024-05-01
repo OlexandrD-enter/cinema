@@ -51,6 +51,9 @@ public class WebClientConfig {
         .exchangeStrategies(strategies)
         .filter((request, next) -> {
           String jwtToken = extractJwtTokenFromContext();
+          if (jwtToken == null) {
+            return next.exchange(request);
+          }
           ClientRequest newRequest = ClientRequest.from(request)
               .header("Authorization", "Bearer " + jwtToken)
               .build();

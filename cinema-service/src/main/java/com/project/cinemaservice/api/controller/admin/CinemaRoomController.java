@@ -1,4 +1,4 @@
-package com.project.cinemaservice.api.admin;
+package com.project.cinemaservice.api.controller.admin;
 
 import com.project.cinemaservice.domain.dto.cinemaroom.CinemaRoomAdminResponse;
 import com.project.cinemaservice.domain.dto.cinemaroom.CinemaRoomCreateRequest;

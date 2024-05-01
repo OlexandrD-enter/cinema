@@ -51,7 +51,7 @@ public class MediaServiceClient {
     }
 
     return mediaWebClient.post()
-        .uri("/api/v1/admin/files")
+        .uri("/api/v1/files")
         .contentType(MediaType.MULTIPART_FORM_DATA)
         .body(BodyInserters.fromMultipartData(body))
         .retrieve()
@@ -72,7 +72,7 @@ public class MediaServiceClient {
    */
   public void deleteFileById(Long fileId) {
     mediaWebClient.delete()
-        .uri("/api/v1/admin/files/{fileId}", fileId)
+        .uri("/api/v1/files/{fileId}", fileId)
         .retrieve()
         .bodyToMono(Void.class)
         .onErrorMap(WebClientRequestException.class,
@@ -91,13 +91,13 @@ public class MediaServiceClient {
    */
   public MovieFileResponseUrl getFile(Long fileId) {
     return mediaWebClient.get()
-        .uri("/api/v1/admin/files/{fileId}", fileId)
+        .uri("/api/v1/files/{fileId}", fileId)
         .retrieve()
         .bodyToMono(MovieFileResponseUrl.class)
         .onErrorMap(WebClientRequestException.class,
-            e -> new MediaServiceException("Media service call exception"))
+            e -> new MediaServiceException("Media service call exception" + e.getMessage()))
         .onErrorMap(WebClientResponseException.class,
-            e -> new MediaServiceException("Media service call exception"))
+            e -> new MediaServiceException("Media service call exception" + e.getMessage()))
         .blockOptional()
         .orElseThrow(() -> new MediaServiceException("Media service call exception"));
   }
