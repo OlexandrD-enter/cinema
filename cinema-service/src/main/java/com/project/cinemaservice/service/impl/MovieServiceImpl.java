@@ -196,8 +196,7 @@ public class MovieServiceImpl implements MovieService {
 
     MovieFile moviePreviewFile = movieFileRepository.findByMovieAndMovieFileType(movie,
         movieFileType).orElseThrow(() -> new EntityNotFoundException(
-        "Movie PreviewFile not found for movie with id {} " + movie.getId())
-    );
+        String.format("Movie PreviewFile not found for movie with id=%d ", movie.getId())));
 
     mediaServiceClient.deleteFileById(moviePreviewFile.getFileId());
 
@@ -225,8 +224,9 @@ public class MovieServiceImpl implements MovieService {
       for (Long genreId : genreIds) {
         if (!existingGenreIds.contains(genreId)) {
           Genre genre = genreRepository.findById(genreId)
-              .orElseThrow(
-                  () -> new EntityNotFoundException("Genre not found with id: " + genreId));
+              .orElseThrow(() -> new EntityNotFoundException(
+                      String.format("Genre not found with id=%d ", genreId)));
+
           existingGenres.add(MovieGenre.builder()
               .genre(genre)
               .movie(movie)

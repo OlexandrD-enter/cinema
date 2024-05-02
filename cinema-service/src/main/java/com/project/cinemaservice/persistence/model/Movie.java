@@ -19,7 +19,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -63,11 +62,13 @@ public class Movie {
   @Column(name = "realise_date")
   private LocalDateTime realiseDate;
 
-  @OneToMany(fetch = FetchType.LAZY, mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "movie", cascade = CascadeType.ALL,
+      orphanRemoval = true)
   @OnDelete(action = OnDeleteAction.CASCADE)
   private List<MovieGenre> movieGenres;
 
-  @OneToMany(fetch = FetchType.LAZY, mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "movie", cascade = CascadeType.ALL,
+      orphanRemoval = true)
   @OnDelete(action = OnDeleteAction.CASCADE)
   private List<MovieFile> movieFiles;
 
