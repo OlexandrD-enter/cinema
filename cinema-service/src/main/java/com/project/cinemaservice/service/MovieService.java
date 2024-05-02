@@ -15,5 +15,8 @@ public interface MovieService {
   MovieAdminResponse editMovie(Long movieId, MovieEditRequest movieEditRequest);
 
   MovieAdminResponse getMovieForAdminById(Long movieId);
+
   MovieClientResponse getMovieForClientById(Long movieId);
+
+  void deleteMovieById(Long movieId);
 }

@@ -129,6 +129,21 @@ public class MovieServiceImpl implements MovieService {
     return movieMapper.toMovieClientResponse(movie, previewFileUrl, trailerFileUrl);
   }
 
+  @Transactional
+  @Override
+  public void deleteMovieById(Long movieId) {
+    log.debug("Deleting movie with id {}", movieId);
+
+    Movie movie = getMovieEntityById(movieId);
+
+    movieRepository.delete(movie);
+
+    movie.getMovieFiles().forEach(movieFile ->
+        mediaServiceClient.deleteFileById(movieFile.getFileId()));
+
+    log.debug("Deleted movie with id {}", movieId);
+  }
+
   private Movie getMovieEntityById(Long movieId) {
     return movieRepository.findById(movieId).orElseThrow(
         () -> new EntityNotFoundException(String.format("Movie with id=%d not found", movieId)));

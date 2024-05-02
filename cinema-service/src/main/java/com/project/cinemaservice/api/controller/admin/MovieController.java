@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,8 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Controller handling operations related to movies.<br> Endpoints provided:<br>
  * - POST /: Creates a new movie based on request data.<br>
- * - PUT /: Edit a movie based on request data.<br>
- * - GET /movieId: Gets a movie details for admin.<br>
+ * - PUT /{movieId}: Edit a movie based on request data.<br>
+ * - GET /{movieId}: Gets a movie details for admin.<br>
+ * - DELETE /{movieId}: Deletes a movie based on request data.<br>
  */
 @Validated
 @RestController
@@ -56,5 +58,12 @@ public class MovieController {
   public ResponseEntity<MovieAdminResponse> getMovie(
       @PathVariable @Min(1) Long movieId) {
     return ResponseEntity.ok().body(movieService.getMovieForAdminById(movieId));
+  }
+
+  @Operation(summary = "This method is used to delete the movies.")
+  @DeleteMapping("/{movieId}")
+  public ResponseEntity<HttpStatus> deleteMovie(@PathVariable @Min(1) Long movieId) {
+    movieService.deleteMovieById(movieId);
+    return ResponseEntity.status(HttpStatus.OK).build();
   }
 }
