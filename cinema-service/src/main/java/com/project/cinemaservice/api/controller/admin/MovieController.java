@@ -4,7 +4,6 @@ import com.project.cinemaservice.domain.dto.movie.MovieAdminResponse;
 import com.project.cinemaservice.domain.dto.movie.MovieDataRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieEditRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieFiltersRequest;
-import com.project.cinemaservice.domain.dto.movie.MoviePageDetails;
 import com.project.cinemaservice.domain.dto.movie.MoviePageDetailsResponse;
 import com.project.cinemaservice.service.MovieService;
 import io.swagger.v3.oas.annotations.Operation;

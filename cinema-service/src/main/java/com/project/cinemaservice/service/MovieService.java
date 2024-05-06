@@ -5,7 +5,6 @@ import com.project.cinemaservice.domain.dto.movie.MovieClientResponse;
 import com.project.cinemaservice.domain.dto.movie.MovieDataRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieEditRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieFiltersRequest;
-import com.project.cinemaservice.domain.dto.movie.MoviePageDetails;
 import com.project.cinemaservice.domain.dto.movie.MoviePageDetailsResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

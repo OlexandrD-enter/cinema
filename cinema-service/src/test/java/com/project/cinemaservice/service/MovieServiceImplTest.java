@@ -1,9 +1,11 @@
 package com.project.cinemaservice.service;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -15,6 +17,9 @@ import com.project.cinemaservice.domain.dto.movie.MovieDataRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieEditRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieFileResponse;
 import com.project.cinemaservice.domain.dto.movie.MovieFileResponseUrl;
+import com.project.cinemaservice.domain.dto.movie.MovieFiltersRequest;
+import com.project.cinemaservice.domain.dto.movie.MoviePageDetails;
+import com.project.cinemaservice.domain.dto.movie.MoviePageDetailsResponse;
 import com.project.cinemaservice.domain.mapper.MovieMapper;
 import com.project.cinemaservice.persistence.enums.MovieFileType;
 import com.project.cinemaservice.persistence.model.Genre;
@@ -25,6 +30,7 @@ import com.project.cinemaservice.persistence.repository.GenreRepository;
 import com.project.cinemaservice.persistence.repository.MovieFileRepository;
 import com.project.cinemaservice.persistence.repository.MovieGenreRepository;
 import com.project.cinemaservice.persistence.repository.MovieRepository;
+import com.project.cinemaservice.service.exception.AgeViolationException;
 import com.project.cinemaservice.service.exception.MovieAlreadyExistsException;
 import com.project.cinemaservice.service.impl.MovieServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
@@ -36,6 +42,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 
 @ExtendWith(MockitoExtension.class)
@@ -412,5 +421,120 @@ public class MovieServiceImplTest {
 
     // When & Then
     assertThrows(EntityNotFoundException.class, () -> movieService.deleteMovieById(movieId));
+  }
+
+  @Test
+  void getAllMoviesByFilter_Success() {
+    // Given
+    Pageable pageable = Pageable.unpaged();
+    MovieFiltersRequest movieFiltersRequest = new MovieFiltersRequest();
+    movieFiltersRequest.setGenreIds(List.of(1L, 2L));
+    Genre genre1 = new Genre();
+    genre1.setId(1L);
+    genre1.setName("Action");
+    Genre genre2 = new Genre();
+    genre2.setId(2L);
+    genre2.setName("Adventure");
+
+    List<Genre> genres = new ArrayList<>(List.of(genre1, genre2));
+
+    Page<MoviePageDetails> moviePage = new PageImpl<>(List.of(MoviePageDetails.builder()
+        .fileId(1L)
+        .build()));
+    Page<MoviePageDetailsResponse> expectedMoviePage = new PageImpl<>(
+        List.of(MoviePageDetailsResponse.builder().build()));
+
+    MovieFileResponseUrl previewResponseUrl = new MovieFileResponseUrl("previewAccessUrl");
+
+    when(genreRepository.findAllById(movieFiltersRequest.getGenreIds())).thenReturn(genres);
+    when(movieRepository.findAllByFilters(any(), any())).thenReturn(moviePage);
+    when(movieMapper.toMoviePageDetailsResponse(any(), anyString())).thenReturn(
+        new MoviePageDetailsResponse());
+    when(mediaServiceClient.getFile(1L)).thenReturn(previewResponseUrl);
+
+    // When
+    Page<MoviePageDetailsResponse> result = movieService.getAllMoviesByFilter(pageable,
+        movieFiltersRequest);
+
+    // Then
+    assertEquals(expectedMoviePage.getContent().size(), result.getContent().size());
+    verify(movieRepository, times(1)).findAllByFilters(any(), any());
+    verify(movieMapper, times(moviePage.getContent().size()))
+        .toMoviePageDetailsResponse(any(), anyString());
+  }
+
+
+  @Test
+  void getAllMoviesByFilter_WhenGenresNotFound_ThrowsEntityNotFoundException() {
+    // Given
+    Pageable pageable = Pageable.unpaged();
+    MovieFiltersRequest movieFiltersRequest = new MovieFiltersRequest();
+    movieFiltersRequest.setGenreIds(List.of(1L, 2L));
+    when(genreRepository.findAllById(movieFiltersRequest.getGenreIds())).thenReturn(
+        new ArrayList<>());
+
+    // When & Then
+    assertThrows(EntityNotFoundException.class,
+        () -> movieService.getAllMoviesByFilter(pageable,
+            movieFiltersRequest));
+  }
+
+  @Test
+  void getAllMoviesByFilter_WhenFromAgeGreaterThanToAge_ThrowsAgeViolationException() {
+    // Given
+    Pageable pageable = Pageable.unpaged();
+    MovieFiltersRequest movieFiltersRequest = new MovieFiltersRequest();
+    movieFiltersRequest.setMinAge(30);
+    movieFiltersRequest.setMaxAge(20);
+    movieFiltersRequest.setGenreIds(List.of(1L, 2L));
+
+    Genre genre1 = new Genre();
+    genre1.setId(1L);
+    genre1.setName("Action");
+    Genre genre2 = new Genre();
+    genre2.setId(2L);
+    genre2.setName("Adventure");
+
+    List<Genre> genres = new ArrayList<>(List.of(genre1, genre2));
+
+    when(genreRepository.findAllById(movieFiltersRequest.getGenreIds())).thenReturn(genres);
+
+    // When & Then
+    assertThrows(AgeViolationException.class, () -> movieService.getAllMoviesByFilter(pageable,
+        movieFiltersRequest));
+  }
+
+  @Test
+  void getAllMoviesByFilter_WhenFromAgeOrToAgeIsNull_ThrowsAgeViolationException() {
+    // Given
+    Pageable pageable = Pageable.unpaged();
+    MovieFiltersRequest movieFiltersRequest1 = new MovieFiltersRequest();
+    movieFiltersRequest1.setMinAge(null);
+    movieFiltersRequest1.setMaxAge(20);
+    movieFiltersRequest1.setGenreIds(List.of(1L, 2L));
+
+    MovieFiltersRequest movieFiltersRequest2 = new MovieFiltersRequest();
+    movieFiltersRequest2.setMinAge(20);
+    movieFiltersRequest2.setMaxAge(null);
+    movieFiltersRequest2.setGenreIds(List.of(1L, 2L));
+
+    Genre genre1 = new Genre();
+    genre1.setId(1L);
+    genre1.setName("Action");
+    Genre genre2 = new Genre();
+    genre2.setId(2L);
+    genre2.setName("Adventure");
+
+    List<Genre> genres = new ArrayList<>(List.of(genre1, genre2));
+
+    when(genreRepository.findAllById(any())).thenReturn(genres);
+
+    // When & Then
+    assertAll(
+        () -> assertThrows(AgeViolationException.class,
+            () -> movieService.getAllMoviesByFilter(pageable, movieFiltersRequest1)),
+        () -> assertThrows(AgeViolationException.class,
+            () -> movieService.getAllMoviesByFilter(pageable, movieFiltersRequest2))
+    );
   }
 }
