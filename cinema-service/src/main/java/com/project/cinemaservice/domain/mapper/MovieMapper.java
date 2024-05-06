@@ -4,6 +4,10 @@ import com.project.cinemaservice.domain.dto.movie.MovieAdminResponse;
 import com.project.cinemaservice.domain.dto.movie.MovieClientResponse;
 import com.project.cinemaservice.domain.dto.movie.MovieDataRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieEditRequest;
+import com.project.cinemaservice.domain.dto.movie.MovieFilters;
+import com.project.cinemaservice.domain.dto.movie.MovieFiltersRequest;
+import com.project.cinemaservice.domain.dto.movie.MoviePageDetails;
+import com.project.cinemaservice.domain.dto.movie.MoviePageDetailsResponse;
 import com.project.cinemaservice.persistence.model.Genre;
 import com.project.cinemaservice.persistence.model.Movie;
 import com.project.cinemaservice.persistence.model.MovieGenre;
@@ -30,6 +34,12 @@ public interface MovieMapper {
   MovieClientResponse toMovieClientResponse(Movie movie, String previewUrl, String trailerUrl);
 
   void updateEntity(@MappingTarget Movie movie, MovieEditRequest movieEditRequest);
+
+  @Mapping(target = "genres", source = "genres")
+  MovieFilters toMovieFilters(
+      MovieFiltersRequest movieFiltersRequest, List<Genre> genres);
+
+  MoviePageDetailsResponse toMoviePageDetailsResponse(MoviePageDetails moviePageDetails, String previewUrl);
 
   /**
    * Maps a list of MovieGenre entities to a list of genre names.

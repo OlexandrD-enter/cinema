@@ -47,9 +47,12 @@ public class GatewayConfig {
         .route(r -> r.path("/admin/genres/**").filters(f -> f
             .rewritePath("/admin/genres", "/api/v1/admin/genres")
         ).uri("lb://cinema-service"))
-        .route(r -> r.path("/admin/movies/**").filters(f -> f
-            .rewritePath("/admin/movies", "/api/v1/admin/movies")
+        .route(r -> r.path("/admin/movies/filters/**").filters(f -> f
+            .rewritePath("/admin/movies/filters", "/api/v1/admin/movies/filters")
         ).uri("lb://cinema-service"))
+       /* .route(r -> r.path("/admin/movies/**").filters(f -> f
+            .rewritePath("/admin/movies", "/api/v1/admin/movies")
+        ).uri("lb://cinema-service"))*/
         .route(r -> r.path("/movies/**").filters(f -> f
             .rewritePath("/movies", "/api/v1/movies")
         ).uri("lb://cinema-service"))

@@ -3,11 +3,16 @@ package com.project.cinemaservice.api.controller.admin;
 import com.project.cinemaservice.domain.dto.movie.MovieAdminResponse;
 import com.project.cinemaservice.domain.dto.movie.MovieDataRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieEditRequest;
+import com.project.cinemaservice.domain.dto.movie.MovieFiltersRequest;
+import com.project.cinemaservice.domain.dto.movie.MoviePageDetails;
+import com.project.cinemaservice.domain.dto.movie.MoviePageDetailsResponse;
 import com.project.cinemaservice.service.MovieService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,6 +23,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -65,5 +71,14 @@ public class MovieController {
   public ResponseEntity<HttpStatus> deleteMovie(@PathVariable @Min(1) Long movieId) {
     movieService.deleteMovieById(movieId);
     return ResponseEntity.status(HttpStatus.OK).build();
+  }
+
+  @Operation(summary = "This method is used to get all movies by filters.")
+  @GetMapping("/filters")
+  public ResponseEntity<Page<MoviePageDetailsResponse>> getAllMovies(
+      Pageable pageable,
+      @RequestBody @Valid MovieFiltersRequest movieFiltersRequest) {
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(movieService.getAllMoviesByFilter(pageable, movieFiltersRequest));
   }
 }

@@ -6,6 +6,10 @@ import com.project.cinemaservice.domain.dto.movie.MovieDataRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieEditRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieFileRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieFileResponse;
+import com.project.cinemaservice.domain.dto.movie.MovieFilters;
+import com.project.cinemaservice.domain.dto.movie.MovieFiltersRequest;
+import com.project.cinemaservice.domain.dto.movie.MoviePageDetails;
+import com.project.cinemaservice.domain.dto.movie.MoviePageDetailsResponse;
 import com.project.cinemaservice.domain.mapper.MovieMapper;
 import com.project.cinemaservice.persistence.enums.MovieFileType;
 import com.project.cinemaservice.persistence.model.Genre;
@@ -18,6 +22,7 @@ import com.project.cinemaservice.persistence.repository.MovieGenreRepository;
 import com.project.cinemaservice.persistence.repository.MovieRepository;
 import com.project.cinemaservice.service.MediaServiceClient;
 import com.project.cinemaservice.service.MovieService;
+import com.project.cinemaservice.service.exception.AgeViolationException;
 import com.project.cinemaservice.service.exception.MovieAlreadyExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.ArrayList;
@@ -26,6 +31,9 @@ import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -144,6 +152,31 @@ public class MovieServiceImpl implements MovieService {
     log.debug("Deleted movie with id {}", movieId);
   }
 
+  @Transactional
+  @Override
+  public Page<MoviePageDetailsResponse> getAllMoviesByFilter(Pageable pageable,
+      MovieFiltersRequest movieFiltersRequest) {
+    List<Genre> genres = retrieveGenresFromFilterRequest(movieFiltersRequest);
+
+    validateAgeRangeFromFilterRequest(movieFiltersRequest);
+    MovieFilters movieFilters = mapFilterRequestToFilters(movieFiltersRequest, genres);
+
+    Page<MoviePageDetails> moviePage = movieRepository.findAllByFilters(pageable, movieFilters);
+
+    List<MoviePageDetailsResponse> moviePageDetailsList = moviePage.stream()
+        .map(movie -> {
+          String previewUrl = getFileAccessUrl(movie.getFileId());
+          return movieMapper.toMoviePageDetailsResponse(movie, previewUrl);
+        }).toList();
+
+    return new PageImpl<>(moviePageDetailsList, pageable, moviePage.getTotalElements());
+  }
+
+  private MovieFilters mapFilterRequestToFilters(MovieFiltersRequest movieFiltersRequest,
+      List<Genre> genres) {
+    return movieMapper.toMovieFilters(movieFiltersRequest, genres);
+  }
+
   private Movie getMovieEntityById(Long movieId) {
     return movieRepository.findById(movieId).orElseThrow(
         () -> new EntityNotFoundException(String.format("Movie with id=%d not found", movieId)));
@@ -225,7 +258,7 @@ public class MovieServiceImpl implements MovieService {
         if (!existingGenreIds.contains(genreId)) {
           Genre genre = genreRepository.findById(genreId)
               .orElseThrow(() -> new EntityNotFoundException(
-                      String.format("Genre not found with id=%d ", genreId)));
+                  String.format("Genre not found with id=%d ", genreId)));
 
           existingGenres.add(MovieGenre.builder()
               .genre(genre)
@@ -277,5 +310,38 @@ public class MovieServiceImpl implements MovieService {
 
   private String getFileAccessUrl(Long fileId) {
     return mediaServiceClient.getFile(fileId).getAccessUrl();
+  }
+
+  private List<Genre> retrieveGenresFromFilterRequest(
+      MovieFiltersRequest movieFiltersRequest) {
+    List<Genre> genres = new ArrayList<>();
+    List<Long> genreIds = movieFiltersRequest.getGenreIds();
+
+    if (!genreIds.isEmpty()) {
+      genres = genreRepository.findAllById(genreIds);
+
+      if (genres.size() != genreIds.size()) {
+        List<Long> foundGenreIds = genres.stream()
+            .map(Genre::getId)
+            .toList();
+        List<Long> notFoundGenreIds = genreIds.stream()
+            .filter(id -> !foundGenreIds.contains(id))
+            .toList();
+        throw new EntityNotFoundException("Genres not found: " + notFoundGenreIds);
+      }
+    }
+    return genres;
+  }
+
+  private void validateAgeRangeFromFilterRequest(
+      MovieFiltersRequest movieFiltersRequest) {
+    Integer fromAge = movieFiltersRequest.getMinAge();
+    Integer toAge = movieFiltersRequest.getMaxAge();
+
+    if (fromAge != null && toAge != null && fromAge.compareTo(toAge) > 0) {
+      throw new AgeViolationException("'From age' should be lower than 'To age'");
+    } else if ((fromAge == null && toAge != null) || (fromAge != null && toAge == null)) {
+      throw new AgeViolationException("Both 'From age' and 'To age' must be provided");
+    }
   }
 }
