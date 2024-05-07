@@ -1,5 +1,6 @@
 package com.project.cinemaservice.domain.dto.movie;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -51,6 +52,8 @@ public class MovieDataRequest {
    @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
        message = "Not valid realiseDate, YYYY-MM-DDTHH:MM:SS")*/
   private LocalDateTime realiseDate;
+  /*@NotNull(message = "Not valid duration")*/
+  private Duration duration;
   /* @Schema(example = "[1, 2, 3]")
    @NotNull(message = "Not valid movieGenreIds")*/
   private List<Long> movieGenreIds;

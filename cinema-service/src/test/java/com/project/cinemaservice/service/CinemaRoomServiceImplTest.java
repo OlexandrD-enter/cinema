@@ -15,7 +15,7 @@ import com.project.cinemaservice.persistence.model.Cinema;
 import com.project.cinemaservice.persistence.model.CinemaRoom;
 import com.project.cinemaservice.persistence.repository.CinemaRepository;
 import com.project.cinemaservice.persistence.repository.CinemaRoomRepository;
-import com.project.cinemaservice.service.exception.CinemaRoomAlreadyExistsException;
+import com.project.cinemaservice.service.exception.EntityAlreadyExistsException;
 import com.project.cinemaservice.service.impl.CinemaRoomServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Optional;
@@ -90,7 +90,7 @@ public class CinemaRoomServiceImplTest {
   }
 
   @Test
-  void createCinemaRoom_WhenRoomAlreadyExists_ThrowsCinemaRoomAlreadyExistsException() {
+  void createCinemaRoom_WhenRoomAlreadyExists_ThrowsEntityAlreadyExistsException() {
     // Given
     String roomName = "Room 1";
     Long cinemaId = 1L;
@@ -101,7 +101,7 @@ public class CinemaRoomServiceImplTest {
         Optional.of(new CinemaRoom()));
 
     // When & Then
-    assertThrows(CinemaRoomAlreadyExistsException.class,
+    assertThrows(EntityAlreadyExistsException.class,
         () -> cinemaRoomService.createCinemaRoom(request));
   }
 

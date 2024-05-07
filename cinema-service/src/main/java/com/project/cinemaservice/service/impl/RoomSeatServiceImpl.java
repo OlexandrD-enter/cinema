@@ -9,7 +9,7 @@ import com.project.cinemaservice.persistence.model.RoomSeat;
 import com.project.cinemaservice.persistence.repository.CinemaRoomRepository;
 import com.project.cinemaservice.persistence.repository.RoomSeatRepository;
 import com.project.cinemaservice.service.RoomSeatService;
-import com.project.cinemaservice.service.exception.SeatNumberAlreadyExistsException;
+import com.project.cinemaservice.service.exception.EntityAlreadyExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -87,7 +87,7 @@ public class RoomSeatServiceImpl implements RoomSeatService {
   private void checkIfSeatRoomExistBySeatNumberAndRoomId(Long seatNumber, Long roomId) {
     if (roomSeatRepository.findBySeatNumberAndCinemaRoomId(seatNumber,
         roomId).isPresent()) {
-      throw new SeatNumberAlreadyExistsException(
+      throw new EntityAlreadyExistsException(
           String.format("RoomSeat with seat number %d and roomId %d exist", seatNumber, roomId));
     }
   }

@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS cinema_service.movies
     country           VARCHAR(100)        NOT NULL,
     director          VARCHAR(255)        NOT NULL,
     realise_date      TIMESTAMP           NOT NULL,
+    duration          NUMERIC             NOT NULL,
     created_at        TIMESTAMP(6)        NOT NULL,
     updated_at        TIMESTAMP(6),
     created_by_email  VARCHAR(255)        NOT NULL,

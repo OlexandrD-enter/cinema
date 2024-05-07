@@ -11,7 +11,7 @@ import com.project.cinemaservice.domain.dto.cinema.CinemaDataRequest;
 import com.project.cinemaservice.domain.mapper.CinemaMapper;
 import com.project.cinemaservice.persistence.model.Cinema;
 import com.project.cinemaservice.persistence.repository.CinemaRepository;
-import com.project.cinemaservice.service.exception.CinemaAlreadyExistsException;
+import com.project.cinemaservice.service.exception.EntityAlreadyExistsException;
 import com.project.cinemaservice.service.impl.CinemaServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Optional;
@@ -65,13 +65,13 @@ public class CinemaServiceImplTest {
   }
 
   @Test
-  void createCinema_WhenCinemaAlreadyExists_ThrowsCinemaAlreadyExistsException() {
+  void createCinema_WhenCinemaAlreadyExists_ThrowsEntityAlreadyExistsException() {
     // Given
     CinemaDataRequest request = new CinemaDataRequest("Cinema", "City", "Address, 1");
     when(cinemaRepository.findByName("Cinema")).thenReturn(Optional.of(new Cinema()));
 
     // When & Then
-    assertThrows(CinemaAlreadyExistsException.class, () -> cinemaService.createCinema(request));
+    assertThrows(EntityAlreadyExistsException.class, () -> cinemaService.createCinema(request));
   }
 
   @Test

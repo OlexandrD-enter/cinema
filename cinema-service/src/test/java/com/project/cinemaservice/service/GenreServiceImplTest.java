@@ -12,7 +12,7 @@ import com.project.cinemaservice.domain.dto.genre.GenreDataRequest;
 import com.project.cinemaservice.domain.mapper.GenreMapper;
 import com.project.cinemaservice.persistence.model.Genre;
 import com.project.cinemaservice.persistence.repository.GenreRepository;
-import com.project.cinemaservice.service.exception.GenreAlreadyExistsException;
+import com.project.cinemaservice.service.exception.EntityAlreadyExistsException;
 import com.project.cinemaservice.service.impl.GenreServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
@@ -53,14 +53,14 @@ public class GenreServiceImplTest {
     when(genreMapper.toGenreAdminResponse(genre)).thenReturn(expectedResponse);
 
     // When
-    GenreAdminResponse response = genreService.createCinema(request);
+    GenreAdminResponse response = genreService.createGenre(request);
 
     // Then
     assertEquals(expectedResponse, response);
   }
 
   @Test
-  void createGenre_WhenGenreAlreadyExists_ThrowsGenreAlreadyExistsExceptio() {
+  void createGenre_WhenGenreAlreadyExists_ThrowsEntityAlreadyExistsException() {
     // Given
     GenreDataRequest request = new GenreDataRequest("Action");
     Genre existingGenre = Genre.builder()
@@ -70,7 +70,7 @@ public class GenreServiceImplTest {
     when(genreRepository.findByName("Action")).thenReturn(Optional.of(existingGenre));
 
     // When & Then
-    assertThrows(GenreAlreadyExistsException.class, () -> genreService.createCinema(request));
+    assertThrows(EntityAlreadyExistsException.class, () -> genreService.createGenre(request));
   }
 
   @Test
@@ -98,7 +98,7 @@ public class GenreServiceImplTest {
     when(genreMapper.toGenreAdminResponse(updatedGenre)).thenReturn(expectedResponse);
 
     // When
-    GenreAdminResponse response = genreService.editCinema(genreId, request);
+    GenreAdminResponse response = genreService.editGenre(genreId, request);
 
     // Then
     assertEquals(expectedResponse, response);
@@ -113,7 +113,7 @@ public class GenreServiceImplTest {
     when(genreRepository.findById(genreId)).thenReturn(Optional.empty());
 
     // When & Then
-    assertThrows(EntityNotFoundException.class, () -> genreService.editCinema(genreId, request));
+    assertThrows(EntityNotFoundException.class, () -> genreService.editGenre(genreId, request));
   }
 
   @Test

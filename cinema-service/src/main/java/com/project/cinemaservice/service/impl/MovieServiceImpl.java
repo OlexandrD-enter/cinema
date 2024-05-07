@@ -23,7 +23,7 @@ import com.project.cinemaservice.persistence.repository.MovieRepository;
 import com.project.cinemaservice.service.MediaServiceClient;
 import com.project.cinemaservice.service.MovieService;
 import com.project.cinemaservice.service.exception.AgeViolationException;
-import com.project.cinemaservice.service.exception.MovieAlreadyExistsException;
+import com.project.cinemaservice.service.exception.EntityAlreadyExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -184,14 +184,14 @@ public class MovieServiceImpl implements MovieService {
 
   private void checkIfMovieExistByName(String movieName) {
     if (movieRepository.findByName(movieName).isPresent()) {
-      throw new MovieAlreadyExistsException(
+      throw new EntityAlreadyExistsException(
           String.format("Movie with name='%s' already exists", movieName));
     }
   }
 
   private void checkIfMovieExistByNameForEdit(String movieName, Long movieId) {
     if (movieRepository.existsByNameAndIdNot(movieName, movieId)) {
-      throw new MovieAlreadyExistsException(
+      throw new EntityAlreadyExistsException(
           String.format("Movie with name='%s' already exists", movieName));
     }
   }

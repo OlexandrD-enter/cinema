@@ -1,5 +1,6 @@
 package com.project.cinemaservice.domain.dto.movie;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -23,6 +24,7 @@ public class MovieClientResponse {
   private String country;
   private String director;
   private LocalDateTime realiseDate;
+  private Duration duration;
   private List<String> movieGenres;
   private String previewUrl;
   private String trailerUrl;

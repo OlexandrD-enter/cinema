@@ -15,7 +15,7 @@ import com.project.cinemaservice.persistence.model.CinemaRoom;
 import com.project.cinemaservice.persistence.model.RoomSeat;
 import com.project.cinemaservice.persistence.repository.CinemaRoomRepository;
 import com.project.cinemaservice.persistence.repository.RoomSeatRepository;
-import com.project.cinemaservice.service.exception.SeatNumberAlreadyExistsException;
+import com.project.cinemaservice.service.exception.EntityAlreadyExistsException;
 import com.project.cinemaservice.service.impl.RoomSeatServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Optional;
@@ -80,14 +80,14 @@ public class RoomSeatServiceImplTest {
   }
 
   @Test
-  void createRoomSeat_WhenSeatNumberAlreadyExists_ThrowsSeatNumberAlreadyExistsException() {
+  void createRoomSeat_WhenSeatNumberAlreadyExists_ThrowsEntityAlreadyExistsException() {
     // Given
     RoomSeatCreateRequest request = new RoomSeatCreateRequest(1L, 1L);
     when(roomSeatRepository.findBySeatNumberAndCinemaRoomId(1L, 1L)).thenReturn(
         Optional.of(new RoomSeat()));
 
     // When & Then
-    assertThrows(SeatNumberAlreadyExistsException.class,
+    assertThrows(EntityAlreadyExistsException.class,
         () -> roomSeatService.createRoomSeat(request));
   }
 

@@ -7,7 +7,7 @@ import com.project.cinemaservice.domain.mapper.GenreMapper;
 import com.project.cinemaservice.persistence.model.Genre;
 import com.project.cinemaservice.persistence.repository.GenreRepository;
 import com.project.cinemaservice.service.GenreService;
-import com.project.cinemaservice.service.exception.GenreAlreadyExistsException;
+import com.project.cinemaservice.service.exception.EntityAlreadyExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class GenreServiceImpl implements GenreService {
 
   @Transactional
   @Override
-  public GenreAdminResponse createCinema(GenreDataRequest genreDataRequest) {
+  public GenreAdminResponse createGenre(GenreDataRequest genreDataRequest) {
     String genreName = genreDataRequest.getName();
     log.debug("Creating genre with name {}", genreName);
 
@@ -44,7 +44,7 @@ public class GenreServiceImpl implements GenreService {
 
   @Transactional
   @Override
-  public GenreAdminResponse editCinema(Long genreId, GenreDataRequest genreDataRequest) {
+  public GenreAdminResponse editGenre(Long genreId, GenreDataRequest genreDataRequest) {
     String genreName = genreDataRequest.getName();
     log.debug("Updating genre with id {}", genreId);
 
@@ -91,7 +91,7 @@ public class GenreServiceImpl implements GenreService {
 
   private void checkIfGenreExistByName(String genreName) {
     if (genreRepository.findByName(genreName).isPresent()) {
-      throw new GenreAlreadyExistsException(
+      throw new EntityAlreadyExistsException(
           String.format("Genre with name='%s' already exists", genreName));
     }
   }

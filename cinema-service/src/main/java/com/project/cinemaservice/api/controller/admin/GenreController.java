@@ -44,7 +44,7 @@ public class GenreController {
   public ResponseEntity<GenreAdminResponse> createGenre(
       @RequestBody @Valid GenreDataRequest genreDataRequest) {
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(genreService.createCinema(genreDataRequest));
+        .body(genreService.createGenre(genreDataRequest));
   }
 
   @Operation(summary = "This method is used to edit the genre.")
@@ -53,7 +53,7 @@ public class GenreController {
       @PathVariable Long genreId,
       @RequestBody @Valid GenreDataRequest genreDataRequest) {
     return ResponseEntity.status(HttpStatus.OK)
-        .body(genreService.editCinema(genreId, genreDataRequest));
+        .body(genreService.editGenre(genreId, genreDataRequest));
   }
 
   @Operation(summary = "This method retrieves a genre details.")

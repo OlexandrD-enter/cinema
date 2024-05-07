@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -62,6 +63,9 @@ public class Movie {
   @Column(name = "realise_date")
   private LocalDateTime realiseDate;
 
+  @Column(name = "duration")
+  private Duration duration;
+
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "movie", cascade = CascadeType.ALL,
       orphanRemoval = true)
   @OnDelete(action = OnDeleteAction.CASCADE)
@@ -71,6 +75,11 @@ public class Movie {
       orphanRemoval = true)
   @OnDelete(action = OnDeleteAction.CASCADE)
   private List<MovieFile> movieFiles;
+
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "movie", cascade = CascadeType.ALL,
+      orphanRemoval = true)
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  private List<Showtime> showTimes;
 
   @Embedded
   @Builder.Default

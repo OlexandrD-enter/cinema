@@ -44,3 +44,7 @@ jwt:
 
 media-service:
   url: ${MEDIA_SERVICE_URL}
+
+
+movies:
+  delay-between-showtime: 5

@@ -6,7 +6,7 @@ import com.project.cinemaservice.domain.mapper.CinemaMapper;
 import com.project.cinemaservice.persistence.model.Cinema;
 import com.project.cinemaservice.persistence.repository.CinemaRepository;
 import com.project.cinemaservice.service.CinemaService;
-import com.project.cinemaservice.service.exception.CinemaAlreadyExistsException;
+import com.project.cinemaservice.service.exception.EntityAlreadyExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,7 +83,7 @@ public class CinemaServiceImpl implements CinemaService {
 
   private void checkIfCinemaExistByName(String cinemaName) {
     if (cinemaRepository.findByName(cinemaName).isPresent()) {
-      throw new CinemaAlreadyExistsException(
+      throw new EntityAlreadyExistsException(
           String.format("Cinema with name='%s' already exists", cinemaName));
     }
   }

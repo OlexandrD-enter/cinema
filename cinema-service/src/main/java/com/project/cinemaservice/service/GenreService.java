@@ -10,9 +10,9 @@ import java.util.List;
  */
 public interface GenreService {
 
-  GenreAdminResponse createCinema(GenreDataRequest genreDataRequest);
+  GenreAdminResponse createGenre(GenreDataRequest genreDataRequest);
 
-  GenreAdminResponse editCinema(Long genreId, GenreDataRequest genreDataRequest);
+  GenreAdminResponse editGenre(Long genreId, GenreDataRequest genreDataRequest);
 
   void deleteGenreById(Long genreId);
 

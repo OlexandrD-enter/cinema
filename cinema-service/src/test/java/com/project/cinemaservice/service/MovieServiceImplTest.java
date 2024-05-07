@@ -31,7 +31,7 @@ import com.project.cinemaservice.persistence.repository.MovieFileRepository;
 import com.project.cinemaservice.persistence.repository.MovieGenreRepository;
 import com.project.cinemaservice.persistence.repository.MovieRepository;
 import com.project.cinemaservice.service.exception.AgeViolationException;
-import com.project.cinemaservice.service.exception.MovieAlreadyExistsException;
+import com.project.cinemaservice.service.exception.EntityAlreadyExistsException;
 import com.project.cinemaservice.service.impl.MovieServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.ArrayList;
@@ -121,7 +121,7 @@ public class MovieServiceImplTest {
   }
 
   @Test
-  void createMovie_WhenMovieAlreadyExists_ThrowsMovieAlreadyExistsException() {
+  void createMovie_WhenMovieAlreadyExists_ThrowsEntityAlreadyExistsException() {
     // Given
     MovieDataRequest movieDataRequest = new MovieDataRequest();
     movieDataRequest.setName("Avengers");
@@ -130,7 +130,7 @@ public class MovieServiceImplTest {
     when(movieRepository.findByName("Avengers")).thenReturn(Optional.of(new Movie()));
 
     // When & Then
-    assertThrows(MovieAlreadyExistsException.class,
+    assertThrows(EntityAlreadyExistsException.class,
         () -> movieService.createMovie(movieDataRequest));
   }
 
@@ -216,7 +216,7 @@ public class MovieServiceImplTest {
   }
 
   @Test
-  void editMovie_WhenMovieAlreadyExists_ThrowsMovieAlreadyExistsException() {
+  void editMovie_WhenMovieAlreadyExists_ThrowsEntityAlreadyExistsException() {
     // Given
     Long movieId = 1L;
     MovieEditRequest movieEditRequest = new MovieEditRequest();
@@ -226,7 +226,7 @@ public class MovieServiceImplTest {
     when(movieRepository.existsByNameAndIdNot("Existing Movie Name", movieId)).thenReturn(true);
 
     // When & Then
-    assertThrows(MovieAlreadyExistsException.class,
+    assertThrows(EntityAlreadyExistsException.class,
         () -> movieService.editMovie(movieId, movieEditRequest));
   }
 

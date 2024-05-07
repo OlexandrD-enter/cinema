@@ -14,7 +14,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long>, MovieReposi
 
   Optional<Movie> findByName(String movieName);
 
-  @EntityGraph(attributePaths = {"movieGenres", "movieFiles"})
+  @EntityGraph(attributePaths = {"movieGenres"})
   Optional<Movie> findById(Long movieId);
 
   boolean existsByNameAndIdNot(String movieName, Long movieId);

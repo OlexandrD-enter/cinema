@@ -28,10 +28,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
+import org.springframework.stereotype.Repository;
 
 /**
  * Custom implementation of MovieRepository for advanced querying.
  */
+@Repository
 public class MovieRepositoryImpl extends QuerydslRepositorySupport implements
     MovieRepositoryCustom {
 

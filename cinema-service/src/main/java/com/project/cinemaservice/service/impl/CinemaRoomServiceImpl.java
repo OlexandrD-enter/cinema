@@ -10,7 +10,7 @@ import com.project.cinemaservice.persistence.model.CinemaRoom;
 import com.project.cinemaservice.persistence.repository.CinemaRepository;
 import com.project.cinemaservice.persistence.repository.CinemaRoomRepository;
 import com.project.cinemaservice.service.CinemaRoomService;
-import com.project.cinemaservice.service.exception.CinemaRoomAlreadyExistsException;
+import com.project.cinemaservice.service.exception.EntityAlreadyExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -89,7 +89,7 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
   private void checkIfRoomExistByNameAndCinemaId(String roomName, Long cinemaId) {
     if (cinemaRoomRepository.findByNameAndCinemaId(roomName,
         cinemaId).isPresent()) {
-      throw new CinemaRoomAlreadyExistsException(
+      throw new EntityAlreadyExistsException(
           String.format("CinemaRoom with name %s and cinemaId %d exist", roomName, cinemaId));
     }
   }
