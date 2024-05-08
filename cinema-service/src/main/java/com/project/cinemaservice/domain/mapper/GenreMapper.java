@@ -6,11 +6,12 @@ import com.project.cinemaservice.domain.dto.genre.GenreDataRequest;
 import com.project.cinemaservice.persistence.model.Genre;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
 /**
  * Mapper interface responsible for mapping between Genre entity and related DTOs.
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface GenreMapper {
 
   Genre toGenreEntity(GenreDataRequest genreDataRequest);

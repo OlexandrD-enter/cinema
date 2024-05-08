@@ -4,8 +4,12 @@ import com.project.cinemaservice.domain.dto.showtime.ShowtimeAdminResponse;
 import com.project.cinemaservice.persistence.model.Showtime;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring")
+/**
+ * Mapper interface responsible for mapping between Showtime entity and related DTOs.
+ */
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ShowtimeMapper {
 
   @Mapping(source = "movie.id", target = "movieId")

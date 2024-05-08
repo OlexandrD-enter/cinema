@@ -10,7 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,7 +18,7 @@ import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
- * Represents a RoomSeat entity storing room seats information in the database.
+ * Represents a Ticket entity storing information about ticket in the database.
  */
 @Builder
 @AllArgsConstructor
@@ -27,25 +26,22 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Getter
 @Setter
 @Entity
-@Table(name = "room_seats", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"seat_number", "room_id"})})
+@Table(name = "tickets")
 @EntityListeners(AuditingEntityListener.class)
-public class RoomSeat {
+public class Ticket {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id")
   private Long id;
 
-  @Column(name = "seat_number")
-  private Long seatNumber;
+  @ManyToOne
+  @JoinColumn(name = "showtime_id")
+  private Showtime showtime;
 
   @ManyToOne
-  @JoinColumn(name = "room_id")
-  private CinemaRoom cinemaRoom;
-
-  @Column(name = "is_booked")
-  private Boolean isBooked;
+  @JoinColumn(name = "room_seat_id")
+  private RoomSeat roomSeat;
 
   @Embedded
   @Builder.Default

@@ -102,6 +102,12 @@ public class MovieRepositoryImpl extends QuerydslRepositorySupport implements
     return new PageImpl<>(moviePageDetails, pageable, total);
   }
 
+  /**
+   * Constructs a Predicate based on provided movie filters.
+   *
+   * @param movieFilters The filters to be applied.
+   * @return             A Predicate representing the filter criteria.
+   */
   public Predicate getPredicateBasedOnFilters(MovieFilters movieFilters) {
     BooleanBuilder predicateBuilder = new BooleanBuilder();
 
@@ -126,9 +132,9 @@ public class MovieRepositoryImpl extends QuerydslRepositorySupport implements
   }
 
   private void applySorting(JPAQuery<Tuple> query, Sort sort) {
-    OrderSpecifier<?> orderSpecifier = sort.isSorted() ?
-        createOrderSpecifier(sort.iterator().next()) :
-        new OrderSpecifier<>(Order.DESC, qMovie.id);
+    OrderSpecifier<?> orderSpecifier = sort.isSorted()
+        ? createOrderSpecifier(sort.iterator().next())
+        : new OrderSpecifier<>(Order.DESC, qMovie.id);
     query.orderBy(orderSpecifier);
   }
 

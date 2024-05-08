@@ -39,7 +39,8 @@ public interface MovieMapper {
   MovieFilters toMovieFilters(
       MovieFiltersRequest movieFiltersRequest, List<Genre> genres);
 
-  MoviePageDetailsResponse toMoviePageDetailsResponse(MoviePageDetails moviePageDetails, String previewUrl);
+  MoviePageDetailsResponse toMoviePageDetailsResponse(MoviePageDetails moviePageDetails,
+      String previewUrl);
 
   /**
    * Maps a list of MovieGenre entities to a list of genre names.

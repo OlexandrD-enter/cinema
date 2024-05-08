@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Represents a showtime dto which contains start and end date for showtime of movie.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

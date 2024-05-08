@@ -19,6 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/**
+ * ShowtimeService implementation responsible for showtime related operations.
+ */
 @Service
 @Slf4j
 public class ShowtimeServiceImpl implements ShowtimeService {
@@ -29,6 +32,16 @@ public class ShowtimeServiceImpl implements ShowtimeService {
   private final ShowtimeMapper showtimeMapper;
   private final long delayBetweenMovieShowtimeInMinutes;
 
+  /**
+   * Constructs a ShowtimeServiceImpl with necessary repositories, mapper, and delay between movie
+   * showtimes.
+   *
+   * @param showtimeRepository                 The repository for managing showtimes.
+   * @param movieRepository                    The repository for managing movies.
+   * @param cinemaRoomRepository               The repository for managing cinema rooms.
+   * @param showtimeMapper                     The mapper for converting between entities and DTOs.
+   * @param delayBetweenMovieShowtimeInMinutes The delay between consecutive showtimes of movies.
+   */
   public ShowtimeServiceImpl(ShowtimeRepository showtimeRepository,
       MovieRepository movieRepository,
       CinemaRoomRepository cinemaRoomRepository,
@@ -54,6 +67,7 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     Showtime showtime = Showtime.builder()
         .movie(movie)
         .cinemaRoom(cinemaRoom)
+        .price(showtimeDataRequest.getPrice())
         .startDate(startDate)
         .endDate(endDate)
         .build();
@@ -81,6 +95,7 @@ public class ShowtimeServiceImpl implements ShowtimeService {
 
     showtime.setMovie(movie);
     showtime.setCinemaRoom(cinemaRoom);
+    showtime.setPrice(showtimeDataRequest.getPrice());
     showtime.setStartDate(startDate);
     showtime.setEndDate(startDate.plus(movie.getDuration()));
 
@@ -115,8 +130,8 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     boolean isOverlap = existingShowTimes.stream()
         .anyMatch(existingShowtime ->
             startDate.minusMinutes(delayBetweenMovieShowtimeInMinutes)
-                .isBefore(existingShowtime.getEndDate()) &&
-                endDate.isAfter(existingShowtime.getStartDate()));
+                .isBefore(existingShowtime.getEndDate())
+                && endDate.isAfter(existingShowtime.getStartDate()));
 
     if (isOverlap) {
       throw new CinemaRoomOccupiedException(

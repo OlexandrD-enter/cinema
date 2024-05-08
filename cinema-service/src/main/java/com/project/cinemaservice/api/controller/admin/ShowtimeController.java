@@ -20,6 +20,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Controller handling operations related to showtime.<br> Endpoints provided:<br>
+ * - POST /: Creates a new showtime based on request data.<br>
+ * - PUT /{showtimeId}: Updates a showtime based on request data.<br>
+ * - GET /showtimeId: Gets a showtime for admin.<br>
+ * - DELETE /{showtimeId}: Deletes a showtime based on request data.<br>
+ */
 @Validated
 @RestController
 @RequiredArgsConstructor
