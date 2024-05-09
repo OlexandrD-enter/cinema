@@ -19,7 +19,9 @@ import com.project.cinemaservice.persistence.repository.ShowtimeRepository;
 import com.project.cinemaservice.persistence.repository.TicketRepository;
 import com.project.cinemaservice.service.OrderService;
 import com.project.cinemaservice.service.exception.RoomSeatAlreadyBookedException;
+import com.project.cinemaservice.service.exception.ShowtimeAlreadyStartedException;
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +58,11 @@ public class OrderServiceImpl implements OrderService {
     Showtime showtime = showtimeRepository.findById(showTimeId).orElseThrow(
         () -> new EntityNotFoundException(
             String.format("Showtime with id=%d not found", showTimeId)));
+
+    if (LocalDateTime.now().isAfter(showtime.getStartDate())) {
+      throw new ShowtimeAlreadyStartedException(
+          String.format("Showtime with id=%d already passed", showTimeId));
+    }
 
     List<OrderTicket> orderTickets = orderCreateRequest.getSelectedRoomSeatsIds().stream()
         .map(roomSeatRequest -> {

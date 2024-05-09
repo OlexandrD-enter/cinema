@@ -9,6 +9,7 @@ import com.project.cinemaservice.persistence.model.Movie;
 import com.project.cinemaservice.persistence.model.QMovie;
 import com.project.cinemaservice.persistence.model.QMovieFile;
 import com.project.cinemaservice.persistence.model.QMovieGenre;
+import com.project.cinemaservice.persistence.model.QShowtime;
 import com.project.cinemaservice.persistence.repository.MovieRepositoryCustom;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
@@ -19,6 +20,7 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -40,6 +42,7 @@ public class MovieRepositoryImpl extends QuerydslRepositorySupport implements
   private static final QMovie qMovie = QMovie.movie;
   private static final QMovieFile qMovieFile = QMovieFile.movieFile;
   private static final QMovieGenre qMovieGenre = QMovieGenre.movieGenre;
+  private static final QShowtime qShowtime = QShowtime.showtime;
   private final JPAQueryFactory queryFactory;
 
   public MovieRepositoryImpl(EntityManager entityManager) {
@@ -86,6 +89,11 @@ public class MovieRepositoryImpl extends QuerydslRepositorySupport implements
               .from(qMovieGenre)
               .where(qMovieGenre.movie.id.eq(tuple.get(qMovie.id)))
               .fetch();
+          List<LocalDateTime> showtimeDates = queryFactory
+              .select(qShowtime.startDate)
+              .from(qShowtime)
+              .where(qShowtime.movie.id.eq(tuple.get(qMovie.id)))
+              .fetch();
           return new MoviePageDetails(
               tuple.get(qMovie.id),
               tuple.get(qMovie.name),
@@ -94,7 +102,8 @@ public class MovieRepositoryImpl extends QuerydslRepositorySupport implements
               tuple.get(qMovie.country),
               tuple.get(qMovie.realiseDate),
               tuple.get(qMovieFile.fileId),
-              genreNamesList
+              genreNamesList,
+              showtimeDates
           );
         })
         .collect(Collectors.toList());

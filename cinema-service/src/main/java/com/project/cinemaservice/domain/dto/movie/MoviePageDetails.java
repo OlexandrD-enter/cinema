@@ -33,4 +33,6 @@ public class MoviePageDetails {
   private Long fileId;
 
   private List<String> movieGenres;
+
+  private List<LocalDateTime> showtimeDates;
 }

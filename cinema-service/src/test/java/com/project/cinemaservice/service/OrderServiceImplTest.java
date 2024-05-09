@@ -23,8 +23,10 @@ import com.project.cinemaservice.persistence.repository.RoomSeatRepository;
 import com.project.cinemaservice.persistence.repository.ShowtimeRepository;
 import com.project.cinemaservice.persistence.repository.TicketRepository;
 import com.project.cinemaservice.service.exception.RoomSeatAlreadyBookedException;
+import com.project.cinemaservice.service.exception.ShowtimeAlreadyStartedException;
 import com.project.cinemaservice.service.impl.OrderServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -144,6 +146,21 @@ public class OrderServiceImplTest {
 
     // When & Then
     assertThrows(RoomSeatAlreadyBookedException.class, () -> orderService.createOrder(orderCreateRequest));
+    verify(orderRepository, never()).save(any());
+    verify(orderReservationEventPublisher, never()).sendOrderReservationEvent(any());
+  }
+
+  @Test
+  void createOrder_WhenShowtimePassed_ThrowsShowtimeAlreadyStartedException() {
+    // Given
+    OrderCreateRequest orderCreateRequest = new OrderCreateRequest();
+    orderCreateRequest.setShowTimeId(1L);
+    Showtime showtime = new Showtime();
+    showtime.setStartDate(LocalDateTime.now().minusHours(1));
+    when(showtimeRepository.findById(1L)).thenReturn(Optional.of(showtime));
+
+    // When & Then
+    assertThrows(ShowtimeAlreadyStartedException.class, () -> orderService.createOrder(orderCreateRequest));
     verify(orderRepository, never()).save(any());
     verify(orderReservationEventPublisher, never()).sendOrderReservationEvent(any());
   }
