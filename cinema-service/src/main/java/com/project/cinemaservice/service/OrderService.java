@@ -1,5 +1,6 @@
 package com.project.cinemaservice.service;
 
+import com.project.cinemaservice.domain.dto.order.OrderClientDetails;
 import com.project.cinemaservice.domain.dto.order.OrderClientResponse;
 import com.project.cinemaservice.domain.dto.order.OrderCreateRequest;
 
@@ -9,4 +10,6 @@ import com.project.cinemaservice.domain.dto.order.OrderCreateRequest;
 public interface OrderService {
 
   OrderClientResponse createOrder(OrderCreateRequest orderCreateRequest);
+
+  OrderClientDetails getOrderForClient(Long orderId);
 }

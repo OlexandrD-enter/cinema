@@ -1,15 +1,20 @@
 package com.project.cinemaservice.api.controller;
 
+import com.project.cinemaservice.domain.dto.movie.MovieAdminResponse;
+import com.project.cinemaservice.domain.dto.order.OrderClientDetails;
 import com.project.cinemaservice.domain.dto.order.OrderClientResponse;
 import com.project.cinemaservice.domain.dto.order.OrderCreateRequest;
 import com.project.cinemaservice.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,5 +39,12 @@ public class OrderClientController {
       @RequestBody @Valid OrderCreateRequest orderCreateRequest) {
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(orderService.createOrder(orderCreateRequest));
+  }
+
+  @Operation(summary = "This method retrieves a order details.")
+  @GetMapping("/{orderId}")
+  public ResponseEntity<OrderClientDetails> getOrder(
+      @PathVariable @Min(1) Long orderId) {
+    return ResponseEntity.ok().body(orderService.getOrderForClient(orderId));
   }
 }

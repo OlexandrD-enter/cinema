@@ -8,16 +8,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Represents an order client response.
+ * Represents an order client details response.
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderClientResponse {
-
+public class OrderClientDetails {
   private Long id;
   private OrderStatus orderStatus;
-  private Long showtimeId;
+  private String showtimeName;
+  private String moviePreviewUrl;
   private List<Long> bookedSeatNumberIds;
 }

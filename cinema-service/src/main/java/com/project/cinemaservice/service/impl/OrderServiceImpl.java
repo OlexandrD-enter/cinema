@@ -1,11 +1,15 @@
 package com.project.cinemaservice.service.impl;
 
+import com.project.cinemaservice.domain.dto.movie.MovieFileResponseUrl;
+import com.project.cinemaservice.domain.dto.order.OrderClientDetails;
 import com.project.cinemaservice.domain.dto.order.OrderClientResponse;
 import com.project.cinemaservice.domain.dto.order.OrderCreateRequest;
+import com.project.cinemaservice.domain.dto.order.OrderDetails;
 import com.project.cinemaservice.domain.dto.roomseat.RoomSeatBriefInfo;
 import com.project.cinemaservice.domain.mapper.OrderMapper;
 import com.project.cinemaservice.messaging.OrderReservationEventPublisher;
 import com.project.cinemaservice.messaging.event.OrderReservationEvent;
+import com.project.cinemaservice.persistence.enums.MovieFileType;
 import com.project.cinemaservice.persistence.enums.OrderStatus;
 import com.project.cinemaservice.persistence.model.Order;
 import com.project.cinemaservice.persistence.model.OrderTicket;
@@ -17,6 +21,7 @@ import com.project.cinemaservice.persistence.repository.OrderTicketRepository;
 import com.project.cinemaservice.persistence.repository.RoomSeatRepository;
 import com.project.cinemaservice.persistence.repository.ShowtimeRepository;
 import com.project.cinemaservice.persistence.repository.TicketRepository;
+import com.project.cinemaservice.service.MediaServiceClient;
 import com.project.cinemaservice.service.OrderService;
 import com.project.cinemaservice.service.exception.RoomSeatAlreadyBookedException;
 import com.project.cinemaservice.service.exception.ShowtimeAlreadyStartedException;
@@ -43,13 +48,18 @@ public class OrderServiceImpl implements OrderService {
   private final TicketRepository ticketRepository;
   private final OrderReservationEventPublisher orderReservationEventPublisher;
   private final OrderMapper orderMapper;
+  private final MediaServiceClient mediaServiceClient;
 
   @Transactional
   @Override
   public OrderClientResponse createOrder(OrderCreateRequest orderCreateRequest) {
     Long showTimeId = orderCreateRequest.getShowTimeId();
+    List<Long> selectedRoomSeatsIds = orderCreateRequest.getSelectedRoomSeatsIds();
 
-    checkIfRoomSeatsAvailableForOrder(showTimeId, orderCreateRequest.getSelectedRoomSeatsIds());
+    log.debug("Creating Order for showtime {} and roomSeats {}", showtimeRepository,
+        selectedRoomSeatsIds);
+
+    checkIfRoomSeatsAvailableForOrder(showTimeId, selectedRoomSeatsIds);
 
     Order order = Order.builder()
         .orderStatus(OrderStatus.RESERVED)
@@ -83,13 +93,33 @@ public class OrderServiceImpl implements OrderService {
 
     order.setOrderTickets(orderTickets);
 
+    List<Long> bookedRoomSeatNumbers = orderTickets.stream()
+        .map(OrderTicket::getTicket)
+        .map(Ticket::getRoomSeat)
+        .map(RoomSeat::getSeatNumber)
+        .toList();
+
     Order savedOrder = orderRepository.save(order);
 
     orderReservationEventPublisher.sendOrderReservationEvent(
         new OrderReservationEvent(savedOrder.getId()));
 
-    return orderMapper.toOrderClientResponse(savedOrder, showtime.getId(),
-        orderCreateRequest.getSelectedRoomSeatsIds());
+    log.debug("Order created for showtime {} and roomSeats {}", showtimeRepository,
+        selectedRoomSeatsIds);
+
+    return orderMapper.toOrderClientResponse(savedOrder, showtime.getId(), bookedRoomSeatNumbers);
+  }
+
+  @Override
+  public OrderClientDetails getOrderForClient(Long orderId) {
+    OrderDetails orderDetails = orderRepository.findOrderDetails(orderId).orElseThrow(
+        () -> new EntityNotFoundException(
+            String.format("Order with id=%d not found", orderId)));
+
+    List<Long> bookedSeatNumberIds = orderRepository.findBookedRoomSeatNumbers(orderId);
+    MovieFileResponseUrl file = mediaServiceClient.getFile(orderDetails.getMoviePreviewFileId());
+
+    return orderMapper.toOrderClientDetails(orderDetails, bookedSeatNumberIds, file.getAccessUrl());
   }
 
   private void checkIfRoomSeatsAvailableForOrder(Long showtimeId, List<Long> roomSeatIds) {
