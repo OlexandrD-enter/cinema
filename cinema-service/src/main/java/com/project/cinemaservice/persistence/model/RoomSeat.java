@@ -44,9 +44,6 @@ public class RoomSeat {
   @JoinColumn(name = "room_id")
   private CinemaRoom cinemaRoom;
 
-  @Column(name = "is_booked")
-  private Boolean isBooked;
-
   @Embedded
   @Builder.Default
   private AuditEntity auditEntity = new AuditEntity();

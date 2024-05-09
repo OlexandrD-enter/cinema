@@ -115,6 +115,7 @@ public class GlobalExceptionHandler {
     } else {
       errorMessage = "Malformed JSON request. Check your request payload.";
     }
-    return new ResponseEntity<>(new CommonExceptionInfo(BAD_REQUEST.value(), errorMessage), BAD_REQUEST);
+    return new ResponseEntity<>(new CommonExceptionInfo(BAD_REQUEST.value(), errorMessage),
+        BAD_REQUEST);
   }
 }

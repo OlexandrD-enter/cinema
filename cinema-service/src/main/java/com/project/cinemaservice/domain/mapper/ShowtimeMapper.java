@@ -1,9 +1,12 @@
 package com.project.cinemaservice.domain.mapper;
 
+import com.project.cinemaservice.domain.dto.roomseat.RoomSeatBriefInfo;
 import com.project.cinemaservice.domain.dto.showtime.ShowtimeAdminResponse;
 import com.project.cinemaservice.persistence.model.Showtime;
+import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
 /**
@@ -20,4 +23,26 @@ public interface ShowtimeMapper {
   @Mapping(source = "auditEntity.modifiedBy", target = "modifiedBy")
   ShowtimeAdminResponse toShowtimeAdminResponse(Showtime showtime);
 
+  @Mapping(source = "showtime.movie.id", target = "movieId")
+  @Mapping(source = "showtime.cinemaRoom.id", target = "cinemaRoomId")
+  @Mapping(source = "showtime.auditEntity.createdAt", target = "createdAt")
+  @Mapping(source = "showtime.auditEntity.updatedAt", target = "updatedAt")
+  @Mapping(source = "showtime.auditEntity.createdBy", target = "createdBy")
+  @Mapping(source = "showtime.auditEntity.modifiedBy", target = "modifiedBy")
+  @Mapping(source = "showtime", target = "allRoomSeats", qualifiedByName = "toAllRoomSeatBriefInfo")
+  ShowtimeAdminResponse toShowtimeAdminResponse(Showtime showtime,
+      List<RoomSeatBriefInfo> bookedRoomSeats);
+
+  /**
+   * Maps all room seats of a Showtime to RoomSeatBriefInfo DTOs.
+   *
+   * @param showtime The Showtime entity containing room seats
+   * @return List of RoomSeatBriefInfo DTOs
+   */
+  @Named("toAllRoomSeatBriefInfo")
+  default List<RoomSeatBriefInfo> mapAllRoomSeats(Showtime showtime) {
+    return showtime.getCinemaRoom().getRoomSeats().stream()
+        .map(roomSeat -> new RoomSeatBriefInfo(roomSeat.getId(), roomSeat.getSeatNumber()))
+        .toList();
+  }
 }

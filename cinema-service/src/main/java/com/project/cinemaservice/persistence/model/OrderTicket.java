@@ -17,6 +17,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+/**
+ * Represents a OrderTicket entity storing information about order tickets in the database.
+ */
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

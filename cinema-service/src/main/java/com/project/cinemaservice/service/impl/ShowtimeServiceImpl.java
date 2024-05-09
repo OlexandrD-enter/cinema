@@ -1,5 +1,6 @@
 package com.project.cinemaservice.service.impl;
 
+import com.project.cinemaservice.domain.dto.roomseat.RoomSeatBriefInfo;
 import com.project.cinemaservice.domain.dto.showtime.ShowtimeAdminResponse;
 import com.project.cinemaservice.domain.dto.showtime.ShowtimeDataRequest;
 import com.project.cinemaservice.domain.dto.showtime.ShowtimeStartAndEndDate;
@@ -9,15 +10,18 @@ import com.project.cinemaservice.persistence.model.Movie;
 import com.project.cinemaservice.persistence.model.Showtime;
 import com.project.cinemaservice.persistence.repository.CinemaRoomRepository;
 import com.project.cinemaservice.persistence.repository.MovieRepository;
+import com.project.cinemaservice.persistence.repository.OrderTicketRepository;
 import com.project.cinemaservice.persistence.repository.ShowtimeRepository;
 import com.project.cinemaservice.service.ShowtimeService;
 import com.project.cinemaservice.service.exception.CinemaRoomOccupiedException;
+import com.project.cinemaservice.service.exception.ShowtimeActionException;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * ShowtimeService implementation responsible for showtime related operations.
@@ -29,6 +33,7 @@ public class ShowtimeServiceImpl implements ShowtimeService {
   private final ShowtimeRepository showtimeRepository;
   private final MovieRepository movieRepository;
   private final CinemaRoomRepository cinemaRoomRepository;
+  private final OrderTicketRepository orderTicketRepository;
   private final ShowtimeMapper showtimeMapper;
   private final long delayBetweenMovieShowtimeInMinutes;
 
@@ -45,20 +50,24 @@ public class ShowtimeServiceImpl implements ShowtimeService {
   public ShowtimeServiceImpl(ShowtimeRepository showtimeRepository,
       MovieRepository movieRepository,
       CinemaRoomRepository cinemaRoomRepository,
-      ShowtimeMapper showtimeMapper,
+      ShowtimeMapper showtimeMapper, OrderTicketRepository orderTicketRepository,
       @Value("${movies.delay-between-showtime}") long delayBetweenMovieShowtimeInMinutes) {
     this.showtimeRepository = showtimeRepository;
     this.movieRepository = movieRepository;
     this.cinemaRoomRepository = cinemaRoomRepository;
     this.showtimeMapper = showtimeMapper;
+    this.orderTicketRepository = orderTicketRepository;
     this.delayBetweenMovieShowtimeInMinutes = delayBetweenMovieShowtimeInMinutes;
   }
 
-
+  @Transactional
   @Override
   public ShowtimeAdminResponse createShowtime(ShowtimeDataRequest showtimeDataRequest) {
     Long cinemaRoomId = showtimeDataRequest.getCinemaRoomId();
     LocalDateTime startDate = showtimeDataRequest.getStartDate();
+
+    log.debug("Creating Showtime for movie {} in cinemaRoom {}", showtimeDataRequest.getMovieId(),
+        cinemaRoomId);
 
     Movie movie = findMovieEntityById(showtimeDataRequest.getMovieId());
     CinemaRoom cinemaRoom = findCinemaRoomEntityById(showtimeDataRequest.getCinemaRoomId());
@@ -76,16 +85,32 @@ public class ShowtimeServiceImpl implements ShowtimeService {
 
     Showtime savedShowtime = showtimeRepository.save(showtime);
 
+    log.debug("Created Showtime for movie {} in cinemaRoom {}", showtimeDataRequest.getMovieId(),
+        cinemaRoomId);
+
     return showtimeMapper.toShowtimeAdminResponse(savedShowtime);
   }
 
+  @Transactional
   @Override
   public ShowtimeAdminResponse editShowtime(Long showtimeId,
       ShowtimeDataRequest showtimeDataRequest) {
-    Showtime showtime = findShowtimeEntityById(showtimeId);
+
+    List<RoomSeatBriefInfo> bookedSeatsByShowtime =
+        orderTicketRepository.findAllByTicketShowtimeAndOrderStatusReservedOrPaid(showtimeId);
+
+    if (!bookedSeatsByShowtime.isEmpty()) {
+      //TODO refund payments for users which booked this showtime or notify them about changes
+      throw new ShowtimeActionException("Showtime already booked by users, it can`t be updated");
+    }
 
     Long cinemaRoomId = showtimeDataRequest.getCinemaRoomId();
     LocalDateTime startDate = showtimeDataRequest.getStartDate();
+
+    log.debug("Updating Showtime for movie {} in cinemaRoom {}", showtimeDataRequest.getMovieId(),
+        cinemaRoomId);
+
+    Showtime showtime = findShowtimeEntityById(showtimeId);
 
     Movie movie = findMovieEntityById(showtimeDataRequest.getMovieId());
     CinemaRoom cinemaRoom = findCinemaRoomEntityById(showtimeDataRequest.getCinemaRoomId());
@@ -101,19 +126,36 @@ public class ShowtimeServiceImpl implements ShowtimeService {
 
     Showtime savedShowtime = showtimeRepository.save(showtime);
 
+    log.debug("Updated Showtime for movie {} in cinemaRoom {}", showtimeDataRequest.getMovieId(),
+        cinemaRoomId);
+
     return showtimeMapper.toShowtimeAdminResponse(savedShowtime);
   }
 
+  @Transactional
   @Override
   public void deleteShowtimeById(Long showtimeId) {
     Showtime showtime = findShowtimeEntityById(showtimeId);
 
+    List<RoomSeatBriefInfo> bookedSeatsByShowtime =
+        orderTicketRepository.findAllByTicketShowtimeAndOrderStatusReservedOrPaid(showtimeId);
+
+    if (!bookedSeatsByShowtime.isEmpty()) {
+      //TODO refund payments for users which booked this showtime and notify them
+      throw new ShowtimeActionException("Showtime already booked by users, it can`t be deleted");
+    }
+
     showtimeRepository.delete(showtime);
   }
 
+  @Transactional
   @Override
   public ShowtimeAdminResponse getShowtimeById(Long showtimeId) {
-    return showtimeMapper.toShowtimeAdminResponse(findShowtimeEntityById(showtimeId));
+    Showtime showtime = findShowtimeEntityById(showtimeId);
+    List<RoomSeatBriefInfo> bookedSeatsByShowtime =
+        orderTicketRepository.findAllByTicketShowtimeAndOrderStatusReservedOrPaid(showtimeId);
+
+    return showtimeMapper.toShowtimeAdminResponse(showtime, bookedSeatsByShowtime);
   }
 
   private Showtime findShowtimeEntityById(Long showtimeId) {

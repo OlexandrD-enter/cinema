@@ -18,6 +18,7 @@ import com.project.cinemaservice.persistence.model.Movie;
 import com.project.cinemaservice.persistence.model.Showtime;
 import com.project.cinemaservice.persistence.repository.CinemaRoomRepository;
 import com.project.cinemaservice.persistence.repository.MovieRepository;
+import com.project.cinemaservice.persistence.repository.OrderTicketRepository;
 import com.project.cinemaservice.persistence.repository.ShowtimeRepository;
 import com.project.cinemaservice.service.exception.CinemaRoomOccupiedException;
 import com.project.cinemaservice.service.impl.ShowtimeServiceImpl;
@@ -46,6 +47,9 @@ public class ShowtimeServiceImplTest {
   private CinemaRoomRepository cinemaRoomRepository;
 
   @Mock
+  private OrderTicketRepository orderTicketRepository;
+
+  @Mock
   private ShowtimeMapper showtimeMapper;
 
   private ShowtimeServiceImpl showtimeService;
@@ -53,7 +57,7 @@ public class ShowtimeServiceImplTest {
   @BeforeEach
   public void openMocks() {
     showtimeService = new ShowtimeServiceImpl(showtimeRepository, movieRepository,
-        cinemaRoomRepository, showtimeMapper, 5L);
+        cinemaRoomRepository, showtimeMapper, orderTicketRepository, 5L);
   }
 
   @Test
