@@ -1,7 +1,6 @@
 package com.project.cinemaservice.persistence.repository;
 
 import com.project.cinemaservice.domain.dto.showtime.ShowtimeStartAndEndDate;
-import com.project.cinemaservice.persistence.model.Movie;
 import com.project.cinemaservice.persistence.model.Showtime;
 import java.util.List;
 import java.util.Optional;
