@@ -1,6 +1,5 @@
 package com.project.cinemaservice.api.controller;
 
-import com.project.cinemaservice.domain.dto.movie.MovieAdminResponse;
 import com.project.cinemaservice.domain.dto.order.OrderClientDetails;
 import com.project.cinemaservice.domain.dto.order.OrderClientResponse;
 import com.project.cinemaservice.domain.dto.order.OrderCreateRequest;
@@ -25,6 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Controller handling operations related to orders.<br> Endpoints provided:<br>
  * - POST /: Creates a new order based on request data.<br>
+ * - GET /{orderId}: Retrieves information about order.<br>
+ * - PUT /{orderId}/cancel: Cancel the order.<br>
  */
 @Validated
 @RestController

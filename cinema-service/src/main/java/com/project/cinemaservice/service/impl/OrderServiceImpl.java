@@ -41,8 +41,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -231,19 +229,15 @@ public class OrderServiceImpl implements OrderService {
 
   private void checkIfUserOrderOwnerOrUserAdmin(String userOrderOwnerEmail) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication instanceof JwtAuthenticationToken jwtAuthenticationToken) {
-      Jwt jwt = jwtAuthenticationToken.getToken();
-      String currentUserEmail = jwt.getClaim("preferred_username").toString();
-      Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-      String authorityToCheck = "ROLE_ADMIN";
+    Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+    String authorityToCheck = "ROLE_ADMIN";
 
-      boolean hasAdminAuthority = authorities.stream()
-          .map(GrantedAuthority::getAuthority)
-          .anyMatch(authority -> authority.equals(authorityToCheck));
+    boolean hasAdminAuthority = authorities.stream()
+        .map(GrantedAuthority::getAuthority)
+        .anyMatch(authority -> authority.equals(authorityToCheck));
 
-      if (!userOrderOwnerEmail.equals(currentUserEmail) && !hasAdminAuthority) {
-        throw new ForbiddenOperationException("User is not the owner of the order");
-      }
+    if (!userOrderOwnerEmail.equals(authentication.getName()) && !hasAdminAuthority) {
+      throw new ForbiddenOperationException("User is not the owner of the order");
     }
   }
 

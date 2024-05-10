@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.project.cinemaservice.domain.dto.roomseat.RoomSeatBriefInfo;
 import com.project.cinemaservice.domain.dto.showtime.ShowtimeAdminResponse;
 import com.project.cinemaservice.domain.dto.showtime.ShowtimeDataRequest;
 import com.project.cinemaservice.domain.dto.showtime.ShowtimeStartAndEndDate;
@@ -213,15 +214,18 @@ public class ShowtimeServiceImplTest {
   void getShowtimeById_Success() {
     // Given
     Showtime showtime = new Showtime();
+    List<RoomSeatBriefInfo> alreadyBookedRoomSeats = new ArrayList<>(
+        List.of(new RoomSeatBriefInfo(1L, 1L)));
     when(showtimeRepository.findById(1L)).thenReturn(Optional.of(showtime));
-    when(showtimeMapper.toShowtimeAdminResponse(showtime)).thenReturn(new ShowtimeAdminResponse());
-
+    when(showtimeMapper.toShowtimeAdminResponse(showtime, alreadyBookedRoomSeats)).thenReturn(new ShowtimeAdminResponse());
+    when(orderTicketRepository.findAllByTicketShowtimeAndOrderStatusReservedOrPaid(1L))
+        .thenReturn(alreadyBookedRoomSeats);
     // When
     ShowtimeAdminResponse response = showtimeService.getShowtimeById(1L);
 
     // Then
     assertNotNull(response);
-    verify(showtimeMapper, times(1)).toShowtimeAdminResponse(showtime);
+    verify(showtimeMapper, times(1)).toShowtimeAdminResponse(showtime, alreadyBookedRoomSeats);
   }
 
   @Test
