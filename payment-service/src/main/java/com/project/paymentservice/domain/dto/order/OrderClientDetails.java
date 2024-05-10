@@ -1,6 +1,6 @@
-package com.project.cinemaservice.domain.dto.order;
+package com.project.paymentservice.domain.dto.order;
 
-import com.project.cinemaservice.persistence.enums.OrderStatus;
+
 import java.math.BigDecimal;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -16,6 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderClientDetails {
+
   private Long id;
   private OrderStatus orderStatus;
   private String movieName;

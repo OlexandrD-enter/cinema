@@ -66,6 +66,10 @@ public class GatewayConfig {
         .route(r -> r.path("/files/**").filters(f -> f
             .rewritePath("/files", "/api/v1/files")
         ).uri("lb://media-service"))
+        //PAYMENT-SERVICE ROUTING
+        .route(r -> r.path("/payments/**").filters(f -> f
+            .rewritePath("/payments", "/api/v1/payments")
+        ).uri("lb://payment-service"))
         .build();
   }
 }

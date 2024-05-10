@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: payment-service
+  profiles:
+    active: dev
+
+server:
+  port: 8095
+
+
+rabbitmq:
+  exchange:
+    order: reservation.exchange
+  routing-key:
+    order-reservation: order.reservation

@@ -32,9 +32,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
       + "FROM Order o "
       + "LEFT JOIN o.orderTickets ot "
       + "LEFT JOIN ot.ticket t "
-      + "LEFT JOIN t.showtime st "
-      + "LEFT JOIN st.cinemaRoom cr "
-      + "LEFT JOIN cr.roomSeats rs "
+      + "LEFT JOIN t.roomSeat rs "
       + "WHERE o.id = :orderId GROUP BY rs.seatNumber")
   List<Long> findBookedRoomSeatNumbers(@Param("orderId") Long orderId);
 

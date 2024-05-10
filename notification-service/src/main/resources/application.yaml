@@ -10,7 +10,7 @@ server:
 
 rabbitmq:
   exchange:
-    user: user-exchange
+    user: user.exchange
   queue:
     email-verification: email-verification-queue
   routing-key:

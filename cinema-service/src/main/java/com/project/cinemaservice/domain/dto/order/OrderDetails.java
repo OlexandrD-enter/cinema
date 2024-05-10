@@ -19,6 +19,6 @@ public class OrderDetails {
   private Long id;
   private OrderStatus orderStatus;
   private BigDecimal totalPrice;
-  private String showtimeName;
+  private String movieName;
   private Long moviePreviewFileId;
 }

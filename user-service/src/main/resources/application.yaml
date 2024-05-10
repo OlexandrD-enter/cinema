@@ -9,7 +9,7 @@ server:
 
 rabbitmq:
   exchange:
-    user: user-exchange
+    user: user.exchange
   routing-key:
     email-verification: user.email-verification
 

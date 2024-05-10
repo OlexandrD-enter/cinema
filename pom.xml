@@ -32,6 +32,7 @@
     <module>notification-service</module>
     <module>cinema-service</module>
     <module>media-service</module>
+    <module>payment-service</module>
   </modules>
 
   <build>
