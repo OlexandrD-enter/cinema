@@ -23,7 +23,6 @@ import com.stripe.param.RefundCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.stripe.param.checkout.SessionCreateParams.LineItem;
 import com.stripe.param.checkout.SessionCreateParams.LineItem.PriceData;
-import jakarta.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
@@ -40,7 +39,6 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class PaymentServiceImpl implements PaymentService {
 
-  private final String stripeApiSecretKey;
   private final String paymentConfiguration;
   private final Long expirationSessionTimeInSeconds;
   private final String successUrl;
@@ -56,7 +54,6 @@ public class PaymentServiceImpl implements PaymentService {
       @Value("${stripe.payment.failure-url}") String failureUrl,
       @Value("${stripe.webhook-secret}") String webhookEndpointSecret,
       CinemaServiceClient cinemaServiceClient, OrderEventPublisher orderEventPublisher) {
-    this.stripeApiSecretKey = stripeApiSecretKey;
     this.paymentConfiguration = paymentConfiguration;
     this.expirationSessionTimeInSeconds = expirationSessionTimeInSeconds;
     this.successUrl = successUrl;
@@ -64,10 +61,7 @@ public class PaymentServiceImpl implements PaymentService {
     this.webhookEndpointSecret = webhookEndpointSecret;
     this.cinemaServiceClient = cinemaServiceClient;
     this.orderEventPublisher = orderEventPublisher;
-  }
 
-  @PostConstruct
-  public void init() {
     Stripe.apiKey = stripeApiSecretKey;
   }
 

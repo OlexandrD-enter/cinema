@@ -1,0 +1,8 @@
+stripe:
+  secret-key: "your secret key"
+  webhook-secret: "your webhook secret"
+  payment:
+    configuration: pmc_1OcTtUGFj3fjs4b41Repbpam
+    session-expiration: 1800
+    success-url: http://localhost:3000/payment?success
+    failure-url: http://localhost:3000/payment?failure

@@ -17,6 +17,8 @@
     <spring-cloud.version>2023.0.1</spring-cloud.version>
     <stripe.version>24.0.0</stripe.version>
     <springdoc.version>2.1.0</springdoc.version>
+    <mockwebserver.version>4.11.0</mockwebserver.version>
+    <okhttp.version>4.11.0</okhttp.version>
   </properties>
   <dependencies>
     <dependency>
@@ -78,6 +80,17 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-amqp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>mockwebserver</artifactId>
+      <version>${mockwebserver.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp</artifactId>
+      <version>${okhttp.version}</version>
     </dependency>
   </dependencies>
   <dependencyManagement>
