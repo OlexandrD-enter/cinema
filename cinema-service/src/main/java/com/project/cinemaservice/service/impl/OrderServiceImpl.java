@@ -5,11 +5,11 @@ import com.project.cinemaservice.domain.dto.order.OrderClientDetails;
 import com.project.cinemaservice.domain.dto.order.OrderClientResponse;
 import com.project.cinemaservice.domain.dto.order.OrderCreateRequest;
 import com.project.cinemaservice.domain.dto.order.OrderDetails;
+import com.project.cinemaservice.domain.dto.order.OrderStatusDetails;
 import com.project.cinemaservice.domain.dto.roomseat.RoomSeatBriefInfo;
 import com.project.cinemaservice.domain.mapper.OrderMapper;
 import com.project.cinemaservice.messaging.OrderReservationEventPublisher;
 import com.project.cinemaservice.messaging.event.OrderReservationEvent;
-import com.project.cinemaservice.persistence.enums.MovieFileType;
 import com.project.cinemaservice.persistence.enums.OrderStatus;
 import com.project.cinemaservice.persistence.model.Order;
 import com.project.cinemaservice.persistence.model.OrderTicket;
@@ -110,6 +110,7 @@ public class OrderServiceImpl implements OrderService {
     return orderMapper.toOrderClientResponse(savedOrder, showtime.getId(), bookedRoomSeatNumbers);
   }
 
+  @Transactional
   @Override
   public OrderClientDetails getOrderForClient(Long orderId) {
     OrderDetails orderDetails = orderRepository.findOrderDetails(orderId).orElseThrow(
@@ -120,6 +121,20 @@ public class OrderServiceImpl implements OrderService {
     MovieFileResponseUrl file = mediaServiceClient.getFile(orderDetails.getMoviePreviewFileId());
 
     return orderMapper.toOrderClientDetails(orderDetails, bookedSeatNumberIds, file.getAccessUrl());
+  }
+
+  @Transactional
+  @Override
+  public OrderStatusDetails confirmOrderPayment(Long orderId) {
+    log.debug("Changing order status to paid for order {}", orderId);
+
+    Order order = orderRepository.findById(orderId).orElseThrow(
+        () -> new EntityNotFoundException(String.format("Order with id=%d not found", orderId)));
+    order.setOrderStatus(OrderStatus.PAID);
+
+    Order savedOrder = orderRepository.save(order);
+
+    return orderMapper.toOrderStatusDetails(savedOrder);
   }
 
   private void checkIfRoomSeatsAvailableForOrder(Long showtimeId, List<Long> roomSeatIds) {

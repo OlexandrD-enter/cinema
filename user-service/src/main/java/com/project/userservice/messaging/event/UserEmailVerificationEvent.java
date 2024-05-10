@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class UserEmailVerification {
+public class UserEmailVerificationEvent {
 
   private String email;
   private String token;

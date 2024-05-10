@@ -29,7 +29,7 @@ public class RegistrationListenerTest {
         "verificationToken");
 
     // When
-    registrationListener.listener(userEmailVerification);
+    registrationListener.registrationListener(userEmailVerification);
 
     // Then
     verify(emailService, times(1)).sendEmail(any(VerificationEmailDetails.class));

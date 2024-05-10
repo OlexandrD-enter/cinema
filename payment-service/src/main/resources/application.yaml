@@ -9,7 +9,7 @@ server:
 
 
 rabbitmq:
-  exchange:
-    order: reservation.exchange
-  routing-key:
-    order-reservation: order.reservation
+  order:
+   payment:
+      exchange: payment.confirm.exchange
+      routing-key: payment.confirm

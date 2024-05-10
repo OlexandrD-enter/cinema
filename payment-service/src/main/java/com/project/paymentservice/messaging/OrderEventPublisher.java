@@ -16,8 +16,8 @@ public class OrderEventPublisher {
   private final String orderReservationRoutingKey;
 
   public OrderEventPublisher(RabbitTemplate rabbitTemplate,
-      @Value("${rabbitmq.exchange.order}") String orderExchange,
-      @Value("${rabbitmq.routing-key.order-reservation}") String orderReservationRoutingKey) {
+      @Value("${rabbitmq.order.payment.exchange}") String orderExchange,
+      @Value("${rabbitmq.order.payment.routing-key}") String orderReservationRoutingKey) {
     this.rabbitTemplate = rabbitTemplate;
     this.orderExchange = orderExchange;
     this.orderReservationRoutingKey = orderReservationRoutingKey;

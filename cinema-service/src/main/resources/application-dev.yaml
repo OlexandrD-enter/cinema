@@ -65,3 +65,7 @@ rabbitmq:
       exchange: order.reservation.exchange
       routing-key: order.reservation.routing
       queue: order-reservation-queue
+    payment:
+      exchange: payment.confirm.exchange
+      routing-key: payment.confirm
+      queue: order-payment-confirm-queue

@@ -1,6 +1,6 @@
 package com.project.userservice.messaging;
 
-import com.project.userservice.messaging.event.UserEmailVerification;
+import com.project.userservice.messaging.event.UserEmailVerificationEvent;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,15 +16,15 @@ public class UserEventPublisher {
   private final String userEmailVerificationRoutingKey;
 
   public UserEventPublisher(RabbitTemplate rabbitTemplate,
-      @Value("${rabbitmq.exchange.user}") String userExchange,
-      @Value("${rabbitmq.routing-key.email-verification:}") String userEmailVerificationRoutingKey) {
+      @Value("${rabbitmq.user.email-verification.exchange}") String userExchange,
+      @Value("${rabbitmq.user.email-verification.routing-key}") String userEmailVerificationRoutingKey) {
     this.rabbitTemplate = rabbitTemplate;
     this.userExchange = userExchange;
     this.userEmailVerificationRoutingKey = userEmailVerificationRoutingKey;
   }
 
-  public void sendEmailVerificationEvent(String userEmail, String token) {
+  public void sendEmailVerificationEvent(UserEmailVerificationEvent userEmailVerificationEvent) {
     rabbitTemplate.convertAndSend(userExchange, userEmailVerificationRoutingKey,
-        new UserEmailVerification(userEmail, token));
+        userEmailVerificationEvent);
   }
 }

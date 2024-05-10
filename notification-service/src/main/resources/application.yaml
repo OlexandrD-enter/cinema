@@ -9,12 +9,11 @@ server:
   port: 8094
 
 rabbitmq:
-  exchange:
-    user: user.exchange
-  queue:
-    email-verification: email-verification-queue
-  routing-key:
-    email-verification: user.email-verification
+  user:
+    email-verification:
+      exchange: user.email.exchange
+      queue: email-verification-queue
+      routing-key: user.email-verification
 
 email:
   source-address: ${EMAIL_SOURCE_ADDRESS}

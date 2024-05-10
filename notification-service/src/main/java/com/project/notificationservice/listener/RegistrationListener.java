@@ -21,12 +21,12 @@ public class RegistrationListener {
 
   @RabbitListener(
       bindings = @QueueBinding(
-          value = @Queue(value = "${rabbitmq.queue.email-verification}", durable = "true"),
-          exchange = @Exchange(value = "${rabbitmq.exchange.user}", type = "topic"),
-          key = "${rabbitmq.routing-key.email-verification}"
+          value = @Queue(value = "${rabbitmq.user.email-verification.queue}", durable = "true"),
+          exchange = @Exchange(value = "${rabbitmq.user.email-verification.exchange}", type = "topic"),
+          key = "${rabbitmq.user.email-verification.routing-key}"
       )
   )
-  public void listener(UserEmailVerification userEmailVerification) {
+  public void registrationListener(UserEmailVerification userEmailVerification) {
     emailService.sendEmail(new VerificationEmailDetails(userEmailVerification.getEmail(),
         userEmailVerification.getToken()));
   }

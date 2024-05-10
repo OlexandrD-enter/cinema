@@ -3,7 +3,7 @@ package com.project.userservice.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -15,6 +15,7 @@ import com.project.userservice.domain.dto.UserRegistrationRequest;
 import com.project.userservice.domain.dto.UserRegistrationResponse;
 import com.project.userservice.domain.mapper.UserMapper;
 import com.project.userservice.messaging.UserEventPublisher;
+import com.project.userservice.messaging.event.UserEmailVerificationEvent;
 import com.project.userservice.persistence.enums.TokenType;
 import com.project.userservice.persistence.enums.UserStatus;
 import com.project.userservice.persistence.model.User;
@@ -84,8 +85,7 @@ public class AuthServiceImplTest {
 
     // Then
     assertEquals(expectedResponse.getEmail(), response.getEmail());
-    verify(publisher, times(1)).sendEmailVerificationEvent(response.getEmail(),
-        userToken.getToken());
+    verify(publisher, times(1)).sendEmailVerificationEvent(any(UserEmailVerificationEvent.class));
   }
 
   @Test
@@ -205,7 +205,7 @@ public class AuthServiceImplTest {
 
     // Then
     verify(userTokenService, times(1)).updateTokenByUserEmail(email, TokenType.EMAIL_VERIFICATION);
-    verify(publisher, times(1)).sendEmailVerificationEvent(email, userToken.getToken());
+    verify(publisher, times(1)).sendEmailVerificationEvent(any(UserEmailVerificationEvent.class));
   }
 
   @Test
@@ -220,7 +220,7 @@ public class AuthServiceImplTest {
     assertThrows(UserTokenUpdateException.class, () -> authService.resendEmailConfirmation(email));
 
     verify(userTokenService, times(1)).updateTokenByUserEmail(email, TokenType.EMAIL_VERIFICATION);
-    verify(publisher, never()).sendEmailVerificationEvent(anyString(), anyString());
+    verify(publisher, never()).sendEmailVerificationEvent(any(UserEmailVerificationEvent.class));
   }
 
   @Test
@@ -235,7 +235,7 @@ public class AuthServiceImplTest {
     assertThrows(EntityNotFoundException.class, () -> authService.resendEmailConfirmation(email));
 
     verify(userTokenService, times(1)).updateTokenByUserEmail(email, TokenType.EMAIL_VERIFICATION);
-    verify(publisher, never()).sendEmailVerificationEvent(anyString(), anyString());
+    verify(publisher, never()).sendEmailVerificationEvent(any(UserEmailVerificationEvent.class));
   }
 }
 

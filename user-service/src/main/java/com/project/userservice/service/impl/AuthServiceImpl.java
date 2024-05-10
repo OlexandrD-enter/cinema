@@ -5,6 +5,7 @@ import com.project.userservice.domain.dto.UserRegistrationRequest;
 import com.project.userservice.domain.dto.UserRegistrationResponse;
 import com.project.userservice.domain.mapper.UserMapper;
 import com.project.userservice.messaging.UserEventPublisher;
+import com.project.userservice.messaging.event.UserEmailVerificationEvent;
 import com.project.userservice.persistence.enums.TokenType;
 import com.project.userservice.persistence.model.User;
 import com.project.userservice.persistence.model.UserToken;
@@ -45,7 +46,8 @@ public class AuthServiceImpl implements AuthService {
       }
     }
 
-    publisher.sendEmailVerificationEvent(user.getEmail(), userToken.getToken());
+    publisher.sendEmailVerificationEvent(
+        new UserEmailVerificationEvent(user.getEmail(), userToken.getToken()));
 
     return userMapper.toRegistrationResponse(user);
   }
@@ -68,6 +70,7 @@ public class AuthServiceImpl implements AuthService {
     UserToken userToken = userTokenService.updateTokenByUserEmail(email,
         TokenType.EMAIL_VERIFICATION);
 
-    publisher.sendEmailVerificationEvent(userToken.getUser().getEmail(), userToken.getToken());
+    publisher.sendEmailVerificationEvent(
+        new UserEmailVerificationEvent(userToken.getUser().getEmail(), userToken.getToken()));
   }
 }

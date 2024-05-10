@@ -8,10 +8,10 @@ server:
   port: 8091
 
 rabbitmq:
-  exchange:
-    user: user.exchange
-  routing-key:
-    email-verification: user.email-verification
+  user:
+    email-verification:
+      exchange: user.email.exchange
+      routing-key: user.email-verification
 
 #minutes
 email:
