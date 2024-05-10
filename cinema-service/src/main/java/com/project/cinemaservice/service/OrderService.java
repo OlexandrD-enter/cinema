@@ -15,4 +15,5 @@ public interface OrderService {
   OrderClientDetails getOrderForClient(Long orderId);
 
   OrderStatusDetails confirmOrderPayment(Long orderId);
+  OrderStatusDetails checkIfOrderPaid(Long orderId);
 }

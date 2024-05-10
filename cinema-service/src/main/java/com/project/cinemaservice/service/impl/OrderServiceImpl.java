@@ -134,6 +134,26 @@ public class OrderServiceImpl implements OrderService {
 
     Order savedOrder = orderRepository.save(order);
 
+    log.debug("Changed order status to paid for order {}", orderId);
+
+    return orderMapper.toOrderStatusDetails(savedOrder);
+  }
+
+  @Transactional
+  @Override
+  public OrderStatusDetails checkIfOrderPaid(Long orderId) {
+    log.debug("Checking if order status equals paid for order {}", orderId);
+
+    Order order = orderRepository.findById(orderId).orElseThrow(
+        () -> new EntityNotFoundException(String.format("Order with id=%d not found", orderId)));
+
+    if (!order.getOrderStatus().equals(OrderStatus.PAID)){
+      order.setOrderStatus(OrderStatus.CANCELLED);
+    }
+    Order savedOrder = orderRepository.save(order);
+
+    log.debug("Changed order status to cancelled for order {}", orderId);
+
     return orderMapper.toOrderStatusDetails(savedOrder);
   }
 

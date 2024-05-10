@@ -1,6 +1,7 @@
 package com.project.cinemaservice.listener;
 
 import com.project.cinemaservice.messaging.event.OrderReservationEvent;
+import com.project.cinemaservice.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.Argument;
 import org.springframework.amqp.rabbit.annotation.Exchange;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class OrderReservationListener {
 
+  private final OrderService orderService;
+
   @RabbitListener(
       bindings = @QueueBinding(
           value = @Queue(value = "${rabbitmq.order.reservation.queue}", durable = "true"),
@@ -26,6 +29,6 @@ public class OrderReservationListener {
       )
   )
   public void listener(OrderReservationEvent orderReservationEvent) {
-    System.out.println("id:" + orderReservationEvent.getOrderId());
+    orderService.checkIfOrderPaid(orderReservationEvent.getOrderId());
   }
 }
