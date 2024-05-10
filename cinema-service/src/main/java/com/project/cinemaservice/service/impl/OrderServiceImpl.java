@@ -12,10 +12,12 @@ import com.project.cinemaservice.messaging.OrderReservationEventPublisher;
 import com.project.cinemaservice.messaging.event.OrderReservationEvent;
 import com.project.cinemaservice.persistence.enums.OrderStatus;
 import com.project.cinemaservice.persistence.model.Order;
+import com.project.cinemaservice.persistence.model.OrderPaymentDetails;
 import com.project.cinemaservice.persistence.model.OrderTicket;
 import com.project.cinemaservice.persistence.model.RoomSeat;
 import com.project.cinemaservice.persistence.model.Showtime;
 import com.project.cinemaservice.persistence.model.Ticket;
+import com.project.cinemaservice.persistence.repository.OrderPaymentDetailsRepository;
 import com.project.cinemaservice.persistence.repository.OrderRepository;
 import com.project.cinemaservice.persistence.repository.OrderTicketRepository;
 import com.project.cinemaservice.persistence.repository.RoomSeatRepository;
@@ -23,13 +25,24 @@ import com.project.cinemaservice.persistence.repository.ShowtimeRepository;
 import com.project.cinemaservice.persistence.repository.TicketRepository;
 import com.project.cinemaservice.service.MediaServiceClient;
 import com.project.cinemaservice.service.OrderService;
+import com.project.cinemaservice.service.PaymentServiceClient;
+import com.project.cinemaservice.service.exception.ForbiddenOperationException;
+import com.project.cinemaservice.service.exception.IllegalOrderStatusException;
 import com.project.cinemaservice.service.exception.RoomSeatAlreadyBookedException;
 import com.project.cinemaservice.service.exception.ShowtimeAlreadyStartedException;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,9 +59,12 @@ public class OrderServiceImpl implements OrderService {
   private final RoomSeatRepository roomSeatRepository;
   private final ShowtimeRepository showtimeRepository;
   private final TicketRepository ticketRepository;
+  private final OrderPaymentDetailsRepository orderPaymentDetailsRepository;
+  private final Map<OrderStatus, Set<OrderStatus>> orderStatusTransitionsMap;
   private final OrderReservationEventPublisher orderReservationEventPublisher;
   private final OrderMapper orderMapper;
   private final MediaServiceClient mediaServiceClient;
+  private final PaymentServiceClient paymentServiceClient;
 
   @Transactional
   @Override
@@ -117,6 +133,8 @@ public class OrderServiceImpl implements OrderService {
         () -> new EntityNotFoundException(
             String.format("Order with id=%d not found", orderId)));
 
+    checkIfUserOrderOwnerOrUserAdmin(orderDetails.getUserEmail());
+
     List<Long> bookedSeatNumberIds = orderRepository.findBookedRoomSeatNumbers(orderId);
     MovieFileResponseUrl file = mediaServiceClient.getFile(orderDetails.getMoviePreviewFileId());
 
@@ -125,12 +143,17 @@ public class OrderServiceImpl implements OrderService {
 
   @Transactional
   @Override
-  public OrderStatusDetails confirmOrderPayment(Long orderId) {
+  public OrderStatusDetails confirmOrderPayment(Long orderId, String transactionId) {
     log.debug("Changing order status to paid for order {}", orderId);
 
     Order order = orderRepository.findById(orderId).orElseThrow(
         () -> new EntityNotFoundException(String.format("Order with id=%d not found", orderId)));
     order.setOrderStatus(OrderStatus.PAID);
+
+    orderPaymentDetailsRepository.save(OrderPaymentDetails.builder()
+        .order(order)
+        .transactionId(transactionId)
+        .build());
 
     Order savedOrder = orderRepository.save(order);
 
@@ -147,7 +170,7 @@ public class OrderServiceImpl implements OrderService {
     Order order = orderRepository.findById(orderId).orElseThrow(
         () -> new EntityNotFoundException(String.format("Order with id=%d not found", orderId)));
 
-    if (!order.getOrderStatus().equals(OrderStatus.PAID)){
+    if (!order.getOrderStatus().equals(OrderStatus.PAID)) {
       order.setOrderStatus(OrderStatus.CANCELLED);
     }
     Order savedOrder = orderRepository.save(order);
@@ -155,6 +178,37 @@ public class OrderServiceImpl implements OrderService {
     log.debug("Changed order status to cancelled for order {}", orderId);
 
     return orderMapper.toOrderStatusDetails(savedOrder);
+  }
+
+  @Transactional
+  @Override
+  public OrderStatusDetails cancelOrder(Long orderId) {
+    log.debug("Cancelling order {}", orderId);
+
+    OrderPaymentDetails orderPaymentDetails =
+        orderPaymentDetailsRepository.findByOrderId(orderId).orElseThrow(
+            () -> new EntityNotFoundException(
+                String.format("Order with id=%d not found", orderId)));
+
+    checkIfOrderStatusTransitionIsAllowed(orderPaymentDetails.getOrder(), OrderStatus.CANCELLED);
+
+    checkIfUserOrderOwnerOrUserAdmin(
+        orderPaymentDetails.getOrder().getAuditEntity().getCreatedBy());
+
+    OrderStatus orderStatus = orderPaymentDetails.getOrder().getOrderStatus();
+    if (orderStatus.equals(OrderStatus.RESERVED)) {
+      orderPaymentDetails.getOrder().setOrderStatus(OrderStatus.CANCELLED);
+    } else if (orderStatus.equals(OrderStatus.PAID)) {
+      paymentServiceClient.refundPayment(orderPaymentDetails.getTransactionId());
+      orderPaymentDetails.getOrder().setOrderStatus(OrderStatus.REFUNDED);
+    }
+
+    OrderPaymentDetails paymentDetails = orderPaymentDetailsRepository.save(orderPaymentDetails);
+
+    log.debug("Order {} changed status to {}", paymentDetails.getOrder().getId(),
+        paymentDetails.getOrder().getOrderStatus());
+
+    return orderMapper.toOrderStatusDetails(paymentDetails.getOrder());
   }
 
   private void checkIfRoomSeatsAvailableForOrder(Long showtimeId, List<Long> roomSeatIds) {
@@ -172,6 +226,32 @@ public class OrderServiceImpl implements OrderService {
         throw new RoomSeatAlreadyBookedException(
             "The following seats are already booked: " + conflictingSeatIds);
       }
+    }
+  }
+
+  private void checkIfUserOrderOwnerOrUserAdmin(String userOrderOwnerEmail) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication instanceof JwtAuthenticationToken jwtAuthenticationToken) {
+      Jwt jwt = jwtAuthenticationToken.getToken();
+      String currentUserEmail = jwt.getClaim("preferred_username").toString();
+      Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+      String authorityToCheck = "ROLE_ADMIN";
+
+      boolean hasAdminAuthority = authorities.stream()
+          .map(GrantedAuthority::getAuthority)
+          .anyMatch(authority -> authority.equals(authorityToCheck));
+
+      if (!userOrderOwnerEmail.equals(currentUserEmail) && !hasAdminAuthority) {
+        throw new ForbiddenOperationException("User is not the owner of the order");
+      }
+    }
+  }
+
+  private void checkIfOrderStatusTransitionIsAllowed(Order order, OrderStatus status) {
+    Set<OrderStatus> allowedStatuses = orderStatusTransitionsMap.get(status);
+    if (!allowedStatuses.contains(order.getOrderStatus())) {
+      throw new IllegalOrderStatusException(String.format("Invalid order status for %s "
+          + "Allowed statuses: %s", status, allowedStatuses));
     }
   }
 }

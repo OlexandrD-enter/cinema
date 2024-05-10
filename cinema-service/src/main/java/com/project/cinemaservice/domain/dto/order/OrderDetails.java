@@ -21,4 +21,5 @@ public class OrderDetails {
   private BigDecimal totalPrice;
   private String movieName;
   private Long moviePreviewFileId;
+  private String userEmail;
 }

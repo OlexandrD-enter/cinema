@@ -13,5 +13,5 @@ public interface PaymentService {
 
   void checkPaymentConfirmation(String payload, String sigHeader);
 
-  void refundPayment(Long orderId);
+  void refundPayment(String transactionId);
 }

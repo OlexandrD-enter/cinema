@@ -2,10 +2,12 @@ package com.project.paymentservice.api.controller;
 
 import com.project.paymentservice.domain.dto.payment.PaymentRequest;
 import com.project.paymentservice.domain.dto.payment.PaymentResponse;
+import com.project.paymentservice.domain.dto.payment.RefundRequest;
 import com.project.paymentservice.service.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,8 +37,16 @@ public class PaymentController {
 
   @PostMapping("/stripe/events")
   public void handleStripeEvent(@RequestBody String payload,
-      @RequestHeader("Stripe-Signature") String sigHeader){
+      @RequestHeader("Stripe-Signature") String sigHeader) {
     stripeService.checkPaymentConfirmation(payload, sigHeader);
+  }
+
+  @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+  @Operation(summary = "This method is used for payment refund")
+  @PostMapping("/refund")
+  public ResponseEntity<HttpStatus> refund(@RequestBody @Valid RefundRequest refundRequest) {
+    stripeService.refundPayment(refundRequest.getTransactionId());
+    return ResponseEntity.ok().build();
   }
 }
 

@@ -15,4 +15,5 @@ import lombok.Setter;
 public class OrderPaymentConfirmEvent {
 
   private Long orderId;
+  private String transactionId;
 }

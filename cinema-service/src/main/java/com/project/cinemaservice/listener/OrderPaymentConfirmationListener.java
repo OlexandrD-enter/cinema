@@ -26,6 +26,7 @@ public class OrderPaymentConfirmationListener {
       )
   )
   public void paymentConfirmationListener(OrderPaymentConfirmEvent orderPaymentConfirmEvent) {
-    orderService.confirmOrderPayment(orderPaymentConfirmEvent.getOrderId());
+    orderService.confirmOrderPayment(orderPaymentConfirmEvent.getOrderId(),
+        orderPaymentConfirmEvent.getTransactionId());
   }
 }

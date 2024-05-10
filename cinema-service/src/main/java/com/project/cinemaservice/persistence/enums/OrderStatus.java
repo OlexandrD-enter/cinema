@@ -6,5 +6,6 @@ package com.project.cinemaservice.persistence.enums;
 public enum OrderStatus {
   RESERVED,
   CANCELLED,
-  PAID
+  PAID,
+  REFUNDED
 }

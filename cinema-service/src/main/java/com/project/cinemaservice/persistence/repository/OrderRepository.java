@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
   @Query("SELECT NEW com.project.cinemaservice.domain.dto.order.OrderDetails( "
-      + "o.id, o.orderStatus, SUM(st.price), m.name, mf.fileId) "
+      + "o.id, o.orderStatus, SUM(st.price), m.name, mf.fileId, o.auditEntity.createdBy) "
       + "FROM Order o "
       + "LEFT JOIN o.orderTickets ot "
       + "LEFT JOIN ot.ticket t "

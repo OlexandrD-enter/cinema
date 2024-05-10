@@ -26,6 +26,8 @@ public class WebClientConfig {
 
   @Value("${media-service.url}")
   private String mediaServiceUrl;
+  @Value("${payment-service.url}")
+  private String paymentServiceUrl;
 
   @LoadBalanced
   @Bean
@@ -49,6 +51,29 @@ public class WebClientConfig {
         .baseUrl(mediaServiceUrl)
         .clientConnector(new ReactorClientHttpConnector(getHttpClient()))
         .exchangeStrategies(strategies)
+        .filter((request, next) -> {
+          String jwtToken = extractJwtTokenFromContext();
+          if (jwtToken == null) {
+            return next.exchange(request);
+          }
+          ClientRequest newRequest = ClientRequest.from(request)
+              .header("Authorization", "Bearer " + jwtToken)
+              .build();
+          return next.exchange(newRequest);
+        })
+        .build();
+  }
+
+  /**
+   * Configures a WebClient for the payment service.
+   *
+   * @return WebClient for the payment service
+   */
+  @Bean(name = "paymentWebClient")
+  public WebClient paymentServiceWebClient() {
+    return webClientBuilder()
+        .baseUrl(paymentServiceUrl)
+        .clientConnector(new ReactorClientHttpConnector(getHttpClient()))
         .filter((request, next) -> {
           String jwtToken = extractJwtTokenFromContext();
           if (jwtToken == null) {

@@ -4,6 +4,7 @@ import com.project.cinemaservice.domain.dto.movie.MovieAdminResponse;
 import com.project.cinemaservice.domain.dto.order.OrderClientDetails;
 import com.project.cinemaservice.domain.dto.order.OrderClientResponse;
 import com.project.cinemaservice.domain.dto.order.OrderCreateRequest;
+import com.project.cinemaservice.domain.dto.order.OrderStatusDetails;
 import com.project.cinemaservice.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -16,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,5 +48,12 @@ public class OrderClientController {
   public ResponseEntity<OrderClientDetails> getOrder(
       @PathVariable @Min(1) Long orderId) {
     return ResponseEntity.ok().body(orderService.getOrderForClient(orderId));
+  }
+
+  @Operation(summary = "This method cancel order.")
+  @PutMapping("/{orderId}/cancel")
+  public ResponseEntity<OrderStatusDetails> cancelOrder(
+      @PathVariable @Min(1) Long orderId) {
+    return ResponseEntity.ok().body(orderService.cancelOrder(orderId));
   }
 }

@@ -15,9 +15,11 @@ import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
 import com.stripe.model.EventDataObjectDeserializer;
+import com.stripe.model.Refund;
 import com.stripe.model.StripeObject;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
+import com.stripe.param.RefundCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.stripe.param.checkout.SessionCreateParams.LineItem;
 import com.stripe.param.checkout.SessionCreateParams.LineItem.PriceData;
@@ -124,7 +126,8 @@ public class PaymentServiceImpl implements PaymentService {
       Map<String, String> metadata = session.getMetadata();
       Long orderId = Long.valueOf(metadata.get("order_id"));
       if (orderId != null) {
-        orderEventPublisher.sendOrderPaymentConfirmEvent(new OrderPaymentConfirmEvent(orderId));
+        orderEventPublisher.sendOrderPaymentConfirmEvent(new OrderPaymentConfirmEvent(orderId,
+            session.getPaymentIntent()));
       } else {
         throw new StripeCustomException("Order ID not found in session metadata");
       }
@@ -132,8 +135,20 @@ public class PaymentServiceImpl implements PaymentService {
   }
 
   @Override
-  public void refundPayment(Long orderId) {
+  public void refundPayment(String transactionId) {
+    try {
+      RefundCreateParams params = RefundCreateParams.builder()
+          .setPaymentIntent(transactionId)
+          .build();
+      Refund refund = Refund.create(params);
 
+      if (!refund.getStatus().equals("succeeded")) {
+        throw new StripeCustomException(String.format(
+            "Refund for transaction %s not success", transactionId));
+      }
+    } catch (StripeException e) {
+      throw new StripeCustomException(e.getMessage());
+    }
   }
 
   private List<LineItem> createLineItems(OrderClientDetails order) {
