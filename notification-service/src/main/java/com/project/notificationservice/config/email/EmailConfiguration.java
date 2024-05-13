@@ -14,11 +14,10 @@ import org.springframework.context.annotation.Configuration;
 public class EmailConfiguration {
 
   /**
-   * Creates a bean representing a mapping between email types and their corresponding message
-   * instances.
+   * Provides a map of email messages based on their types.
    *
-   * @return A {@link Map} containing the mapping between {@link EmailType} and
-   * {@link EmailMessage}.
+   * @param verificationEmailMessage Verification email message bean
+   * @return Map of email messages keyed by their types
    */
   @Bean
   public Map<EmailType, EmailMessage> emails(

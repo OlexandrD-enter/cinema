@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+/**
+ * Global filter to pass Authorization header to downstream services.
+ */
 @Component
 public class AuthHeaderFilter implements GlobalFilter {
 

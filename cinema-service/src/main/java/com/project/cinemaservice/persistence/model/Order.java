@@ -26,7 +26,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
- * Represents a Order entity storing information about orders in the database.
+ * Represents an Order entity storing information about orders in the database.
  */
 @Builder
 @AllArgsConstructor

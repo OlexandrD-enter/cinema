@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 /**
- * Represents the paid order event
+ * Represents an event for order payment confirmation.
  */
 @Getter
 @Setter

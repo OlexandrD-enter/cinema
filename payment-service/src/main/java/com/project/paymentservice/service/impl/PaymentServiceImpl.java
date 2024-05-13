@@ -47,6 +47,18 @@ public class PaymentServiceImpl implements PaymentService {
   private final CinemaServiceClient cinemaServiceClient;
   private final OrderEventPublisher orderEventPublisher;
 
+  /**
+   * Constructor for PaymentServiceImpl.
+   *
+   * @param stripeApiSecretKey              Stripe API secret key
+   * @param paymentConfiguration           Payment configuration
+   * @param expirationSessionTimeInSeconds  Expiration session time in seconds
+   * @param successUrl                      Success URL for payment
+   * @param failureUrl                      Failure URL for payment
+   * @param webhookEndpointSecret          Webhook endpoint secret
+   * @param cinemaServiceClient            Client for interacting with the cinema service
+   * @param orderEventPublisher            Publisher for order events
+   */
   public PaymentServiceImpl(@Value("${stripe.secret-key}") String stripeApiSecretKey,
       @Value("${stripe.payment.configuration}") String paymentConfiguration,
       @Value("${stripe.payment.session-expiration}") Long expirationSessionTimeInSeconds,

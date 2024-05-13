@@ -15,6 +15,8 @@ public interface OrderService {
   OrderClientDetails getOrderForClient(Long orderId);
 
   OrderStatusDetails confirmOrderPayment(Long orderId, String transactionId);
+
   OrderStatusDetails checkIfOrderPaid(Long orderId);
+
   OrderStatusDetails cancelOrder(Long orderId);
 }

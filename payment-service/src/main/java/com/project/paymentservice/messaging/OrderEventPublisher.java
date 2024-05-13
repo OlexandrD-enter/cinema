@@ -15,6 +15,13 @@ public class OrderEventPublisher {
   private final String orderExchange;
   private final String orderReservationRoutingKey;
 
+  /**
+   * Constructor for OrderEventPublisher.
+   *
+   * @param rabbitTemplate               RabbitTemplate for sending messages
+   * @param orderExchange                Exchange for order events
+   * @param orderReservationRoutingKey   Routing key for order reservation events
+   */
   public OrderEventPublisher(RabbitTemplate rabbitTemplate,
       @Value("${rabbitmq.order.payment.exchange}") String orderExchange,
       @Value("${rabbitmq.order.payment.routing-key}") String orderReservationRoutingKey) {

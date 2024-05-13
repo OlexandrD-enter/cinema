@@ -15,9 +15,17 @@ public class UserEventPublisher {
   private final String userExchange;
   private final String userEmailVerificationRoutingKey;
 
+  /**
+   * Constructor for UserEventPublisher.
+   *
+   * @param rabbitTemplate                  RabbitTemplate for sending messages
+   * @param userExchange                    Exchange for user events
+   * @param userEmailVerificationRoutingKey Routing key for user email verification events
+   */
   public UserEventPublisher(RabbitTemplate rabbitTemplate,
       @Value("${rabbitmq.user.email-verification.exchange}") String userExchange,
-      @Value("${rabbitmq.user.email-verification.routing-key}") String userEmailVerificationRoutingKey) {
+      @Value("${rabbitmq.user.email-verification.routing-key}")
+      String userEmailVerificationRoutingKey) {
     this.rabbitTemplate = rabbitTemplate;
     this.userExchange = userExchange;
     this.userEmailVerificationRoutingKey = userEmailVerificationRoutingKey;

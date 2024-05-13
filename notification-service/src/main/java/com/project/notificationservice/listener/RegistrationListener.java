@@ -22,7 +22,8 @@ public class RegistrationListener {
   @RabbitListener(
       bindings = @QueueBinding(
           value = @Queue(value = "${rabbitmq.user.email-verification.queue}", durable = "true"),
-          exchange = @Exchange(value = "${rabbitmq.user.email-verification.exchange}", type = "topic"),
+          exchange = @Exchange(value = "${rabbitmq.user.email-verification.exchange}",
+              type = "topic"),
           key = "${rabbitmq.user.email-verification.routing-key}"
       )
   )

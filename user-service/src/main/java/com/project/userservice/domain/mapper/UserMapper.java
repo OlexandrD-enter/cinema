@@ -6,11 +6,12 @@ import com.project.userservice.domain.dto.UserRegistrationResponse;
 import com.project.userservice.persistence.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
 /**
  * Mapper interface responsible for mapping between User entities and related DTOs.
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
 
   @Mapping(target = "role", constant = "USER")

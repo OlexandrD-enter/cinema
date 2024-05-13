@@ -17,6 +17,13 @@ public class CinemaServiceClient {
 
   private final WebClient cinemaWebClient;
 
+  /**
+   * Retrieves order details from the cinema service.
+   *
+   * @param orderId The ID of the order to retrieve details for
+   * @return The details of the order
+   * @throws CinemaServiceException If an error occurs while communicating with the cinema service
+   */
   public OrderClientDetails getOrderDetails(Long orderId) {
     return cinemaWebClient.get()
         .uri("/api/v1/orders/{orderId}", orderId)

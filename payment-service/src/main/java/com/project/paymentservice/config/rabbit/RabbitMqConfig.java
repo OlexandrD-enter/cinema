@@ -8,6 +8,9 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuration class for RabbitMQ setup.
+ */
 @Configuration
 @EnableRabbit
 public class RabbitMqConfig {
@@ -17,6 +20,13 @@ public class RabbitMqConfig {
     return new Jackson2JsonMessageConverter();
   }
 
+  /**
+   * Bean for RabbitTemplate, used for sending messages to RabbitMQ.
+   *
+   * @param connectionFactory ConnectionFactory to create RabbitTemplate
+   * @param messageConverter  MessageConverter to convert messages
+   * @return RabbitTemplate instance
+   */
   @Bean
   public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
       MessageConverter messageConverter) {

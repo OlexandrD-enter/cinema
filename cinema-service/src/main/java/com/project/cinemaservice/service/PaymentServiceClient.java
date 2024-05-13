@@ -19,8 +19,14 @@ public class PaymentServiceClient {
 
   private final WebClient paymentWebClient;
 
-  public Void refundPayment(String transactionId) {
-    return paymentWebClient.post()
+  /**
+   * Refunds a payment with the given transaction ID.
+   *
+   * @param transactionId The ID of the transaction to be refunded
+   * @throws MediaServiceException If an error occurs while communicating with the payment service
+   */
+  public void refundPayment(String transactionId) {
+    paymentWebClient.post()
         .uri("/api/v1/payments/refund")
         .contentType(MediaType.APPLICATION_JSON)
         .body(BodyInserters.fromValue(new OrderRefundRequest(transactionId)))

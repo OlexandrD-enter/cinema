@@ -20,6 +20,10 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
+/**
+ * Represents an OrderPaymentDetails entity storing information about order payment details in the
+ * database.
+ */
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
