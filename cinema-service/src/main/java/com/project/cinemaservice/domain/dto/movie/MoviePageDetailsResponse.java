@@ -32,7 +32,7 @@ public class MoviePageDetailsResponse {
 
   private List<String> movieGenres;
 
-  private List<LocalDateTime> showtimeDates;
+  private List<MovieShowtimeBriefInfo> showtimeDates;
 
   private String previewUrl;
 }

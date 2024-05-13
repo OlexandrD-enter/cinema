@@ -1,8 +1,11 @@
 package com.project.cinemaservice.persistence.repository.impl;
 
 
+import static com.querydsl.core.types.Projections.constructor;
+
 import com.project.cinemaservice.domain.dto.movie.MovieFilters;
 import com.project.cinemaservice.domain.dto.movie.MoviePageDetails;
+import com.project.cinemaservice.domain.dto.movie.MovieShowtimeBriefInfo;
 import com.project.cinemaservice.persistence.enums.MovieFileType;
 import com.project.cinemaservice.persistence.model.Genre;
 import com.project.cinemaservice.persistence.model.Movie;
@@ -20,7 +23,7 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -89,10 +92,15 @@ public class MovieRepositoryImpl extends QuerydslRepositorySupport implements
               .from(qMovieGenre)
               .where(qMovieGenre.movie.id.eq(tuple.get(qMovie.id)))
               .fetch();
-          List<LocalDateTime> showtimeDates = queryFactory
-              .select(qShowtime.startDate)
+          List<MovieShowtimeBriefInfo> showtimeDates = queryFactory
+              .select(constructor(MovieShowtimeBriefInfo.class,
+                  qShowtime.id, qShowtime.startDate))
               .from(qShowtime)
-              .where(qShowtime.movie.id.eq(tuple.get(qMovie.id)))
+              .where(
+                  qShowtime.movie.id.eq(tuple.get(qMovie.id))
+                      .and(qShowtime.startDate.after(LocalDate.now().atStartOfDay()))
+              )
+              .orderBy(new OrderSpecifier<>(Order.ASC, qShowtime.startDate))
               .fetch();
           return new MoviePageDetails(
               tuple.get(qMovie.id),
@@ -115,7 +123,7 @@ public class MovieRepositoryImpl extends QuerydslRepositorySupport implements
    * Constructs a Predicate based on provided movie filters.
    *
    * @param movieFilters The filters to be applied.
-   * @return             A Predicate representing the filter criteria.
+   * @return A Predicate representing the filter criteria.
    */
   public Predicate getPredicateBasedOnFilters(MovieFilters movieFilters) {
     BooleanBuilder predicateBuilder = new BooleanBuilder();

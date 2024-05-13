@@ -34,5 +34,5 @@ public class MoviePageDetails {
 
   private List<String> movieGenres;
 
-  private List<LocalDateTime> showtimeDates;
+  private List<MovieShowtimeBriefInfo> showtimeDates;
 }

@@ -26,6 +26,7 @@ import com.project.cinemaservice.persistence.repository.TicketRepository;
 import com.project.cinemaservice.service.MediaServiceClient;
 import com.project.cinemaservice.service.OrderService;
 import com.project.cinemaservice.service.PaymentServiceClient;
+import com.project.cinemaservice.service.exception.CancellationTimeIsUpException;
 import com.project.cinemaservice.service.exception.ForbiddenOperationException;
 import com.project.cinemaservice.service.exception.IllegalOrderStatusException;
 import com.project.cinemaservice.service.exception.RoomSeatAlreadyBookedException;
@@ -188,12 +189,15 @@ public class OrderServiceImpl implements OrderService {
             () -> new EntityNotFoundException(
                 String.format("Order with id=%d not found", orderId)));
 
-    checkIfOrderStatusTransitionIsAllowed(orderPaymentDetails.getOrder(), OrderStatus.CANCELLED);
+    Order order = orderPaymentDetails.getOrder();
 
-    checkIfUserOrderOwnerOrUserAdmin(
-        orderPaymentDetails.getOrder().getAuditEntity().getCreatedBy());
+    checkIfOrderStatusTransitionIsAllowed(order, OrderStatus.CANCELLED);
 
-    OrderStatus orderStatus = orderPaymentDetails.getOrder().getOrderStatus();
+    checkIfUserOrderOwnerOrUserAdmin(order.getAuditEntity().getCreatedBy());
+
+    checkIfCancellationTimeIsCorrect(order);
+
+    OrderStatus orderStatus = order.getOrderStatus();
     if (orderStatus.equals(OrderStatus.RESERVED)) {
       orderPaymentDetails.getOrder().setOrderStatus(OrderStatus.CANCELLED);
     } else if (orderStatus.equals(OrderStatus.PAID)) {
@@ -246,6 +250,15 @@ public class OrderServiceImpl implements OrderService {
     if (!allowedStatuses.contains(order.getOrderStatus())) {
       throw new IllegalOrderStatusException(String.format("Invalid order status for %s "
           + "Allowed statuses: %s", status, allowedStatuses));
+    }
+  }
+
+  private void checkIfCancellationTimeIsCorrect(Order order) {
+    LocalDateTime startDateOfShowtimeByOrderId = showtimeRepository.findStartDateOfShowtimeByOrderId(
+        order.getId());
+    if (LocalDateTime.now().plusHours(1).isAfter(startDateOfShowtimeByOrderId)) {
+      throw new CancellationTimeIsUpException(
+          String.format("It`s to late to cancel order with id=%d", order.getId()));
     }
   }
 }
