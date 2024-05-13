@@ -3,7 +3,6 @@ package com.project.cinemaservice.domain.mapper;
 import com.project.cinemaservice.domain.dto.cinemaroom.CinemaRoomAdminResponse;
 import com.project.cinemaservice.domain.dto.cinemaroom.CinemaRoomCreateRequest;
 import com.project.cinemaservice.domain.dto.roomseat.RoomSeatBriefInfo;
-import com.project.cinemaservice.persistence.model.Cinema;
 import com.project.cinemaservice.persistence.model.CinemaRoom;
 import com.project.cinemaservice.persistence.model.RoomSeat;
 import java.util.List;
@@ -19,8 +18,7 @@ public interface CinemaRoomMapper {
 
   @Mapping(source = "cinemaRoomCreateRequest.name", target = "name")
   @Mapping(source = "cinemaRoomCreateRequest.roomType", target = "roomType")
-  @Mapping(source = "cinema", target = "cinema")
-  CinemaRoom toCinemaRoomEntity(CinemaRoomCreateRequest cinemaRoomCreateRequest, Cinema cinema);
+  CinemaRoom toCinemaRoomEntity(CinemaRoomCreateRequest cinemaRoomCreateRequest);
 
   @Mapping(source = "auditEntity.createdAt", target = "createdAt")
   @Mapping(source = "auditEntity.updatedAt", target = "updatedAt")

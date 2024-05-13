@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import com.project.cinemaservice.domain.dto.roomseat.RoomSeatBriefInfo;
 import com.project.cinemaservice.domain.dto.showtime.ShowtimeAdminResponse;
+import com.project.cinemaservice.domain.dto.showtime.ShowtimeClientResponse;
 import com.project.cinemaservice.domain.dto.showtime.ShowtimeDataRequest;
 import com.project.cinemaservice.domain.dto.showtime.ShowtimeStartAndEndDate;
 import com.project.cinemaservice.domain.mapper.ShowtimeMapper;
@@ -22,6 +24,7 @@ import com.project.cinemaservice.persistence.repository.MovieRepository;
 import com.project.cinemaservice.persistence.repository.OrderTicketRepository;
 import com.project.cinemaservice.persistence.repository.ShowtimeRepository;
 import com.project.cinemaservice.service.exception.CinemaRoomOccupiedException;
+import com.project.cinemaservice.service.exception.ShowtimeAlreadyStartedException;
 import com.project.cinemaservice.service.impl.ShowtimeServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.Duration;
@@ -211,17 +214,18 @@ public class ShowtimeServiceImplTest {
   }
 
   @Test
-  void getShowtimeById_Success() {
+  void getShowtimeByIdForAdmin_Success() {
     // Given
     Showtime showtime = new Showtime();
     List<RoomSeatBriefInfo> alreadyBookedRoomSeats = new ArrayList<>(
         List.of(new RoomSeatBriefInfo(1L, 1L)));
     when(showtimeRepository.findById(1L)).thenReturn(Optional.of(showtime));
-    when(showtimeMapper.toShowtimeAdminResponse(showtime, alreadyBookedRoomSeats)).thenReturn(new ShowtimeAdminResponse());
+    when(showtimeMapper.toShowtimeAdminResponse(showtime, alreadyBookedRoomSeats)).thenReturn(
+        new ShowtimeAdminResponse());
     when(orderTicketRepository.findAllByTicketShowtimeAndOrderStatusReservedOrPaid(1L))
         .thenReturn(alreadyBookedRoomSeats);
     // When
-    ShowtimeAdminResponse response = showtimeService.getShowtimeById(1L);
+    ShowtimeAdminResponse response = showtimeService.getShowtimeByIdForAdmin(1L);
 
     // Then
     assertNotNull(response);
@@ -229,12 +233,55 @@ public class ShowtimeServiceImplTest {
   }
 
   @Test
-  void getShowtimeById_ShowtimeNotFound_ThrowsEntityNotFoundException() {
+  void getShowtimeByIdForAdmin_ShowtimeNotFound_ThrowsEntityNotFoundException() {
     // Given
     when(showtimeRepository.findById(1L)).thenReturn(Optional.empty());
 
     // When & Then
-    assertThrows(EntityNotFoundException.class, () -> showtimeService.getShowtimeById(1L));
+    assertThrows(EntityNotFoundException.class, () -> showtimeService.getShowtimeByIdForAdmin(1L));
     verify(showtimeMapper, never()).toShowtimeAdminResponse(any());
+  }
+
+  @Test
+  void getShowtimeByIdForClient_Success() {
+    // Given
+    Showtime showtime = new Showtime();
+    showtime.setStartDate(LocalDateTime.now().plusHours(1));
+    List<RoomSeatBriefInfo> alreadyBookedRoomSeats = new ArrayList<>(
+        List.of(new RoomSeatBriefInfo(1L, 1L)));
+    when(showtimeRepository.findById(1L)).thenReturn(Optional.of(showtime));
+    when(showtimeMapper.toShowtimeClientResponse(showtime, alreadyBookedRoomSeats)).thenReturn(
+        new ShowtimeClientResponse());
+    when(orderTicketRepository.findAllByTicketShowtimeAndOrderStatusReservedOrPaid(1L))
+        .thenReturn(alreadyBookedRoomSeats);
+    // When
+    ShowtimeClientResponse response = showtimeService.getShowtimeByIdForClient(1L);
+
+    // Then
+    assertNotNull(response);
+    verify(showtimeMapper, times(1)).toShowtimeClientResponse(showtime, alreadyBookedRoomSeats);
+  }
+
+  @Test
+  void getShowtimeByIdForClient_WhenShowtimeAlreadyPassed_ThrowsShowtimeAlreadyStartedException() {
+    // Given
+    Showtime showtime = new Showtime();
+    showtime.setStartDate(LocalDateTime.now().minusHours(1));
+
+    when(showtimeRepository.findById(1L)).thenReturn(Optional.of(showtime));
+
+    // When & Then
+    assertThrows(ShowtimeAlreadyStartedException.class,
+        () -> showtimeService.getShowtimeByIdForClient(1L));
+  }
+
+  @Test
+  void getShowtimeByIdForClient_ShowtimeNotFound_ThrowsEntityNotFoundException() {
+    // Given
+    when(showtimeRepository.findById(1L)).thenReturn(Optional.empty());
+
+    // When & Then
+    assertThrows(EntityNotFoundException.class, () -> showtimeService.getShowtimeByIdForClient(1L));
+    verify(showtimeMapper, never()).toShowtimeClientResponse(any(), anyList());
   }
 }

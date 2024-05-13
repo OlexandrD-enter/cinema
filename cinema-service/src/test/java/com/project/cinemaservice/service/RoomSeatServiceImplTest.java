@@ -58,7 +58,7 @@ public class RoomSeatServiceImplTest {
 
     when(cinemaRoomRepository.findById(1L)).thenReturn(Optional.of(cinemaRoom));
     when(roomSeatRepository.findBySeatNumberAndCinemaRoomId(10L, 1L)).thenReturn(Optional.empty());
-    when(roomSeatMapper.toRoomSeatEntity(request, cinemaRoom)).thenReturn(roomSeat);
+    when(roomSeatMapper.toRoomSeatEntity(request)).thenReturn(roomSeat);
     when(roomSeatRepository.save(roomSeat)).thenReturn(roomSeat);
     when(roomSeatMapper.toRoomSeatAdminResponse(roomSeat)).thenReturn(expectedResponse);
 

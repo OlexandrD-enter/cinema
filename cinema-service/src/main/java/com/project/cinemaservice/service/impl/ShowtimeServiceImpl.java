@@ -2,6 +2,7 @@ package com.project.cinemaservice.service.impl;
 
 import com.project.cinemaservice.domain.dto.roomseat.RoomSeatBriefInfo;
 import com.project.cinemaservice.domain.dto.showtime.ShowtimeAdminResponse;
+import com.project.cinemaservice.domain.dto.showtime.ShowtimeClientResponse;
 import com.project.cinemaservice.domain.dto.showtime.ShowtimeDataRequest;
 import com.project.cinemaservice.domain.dto.showtime.ShowtimeStartAndEndDate;
 import com.project.cinemaservice.domain.mapper.ShowtimeMapper;
@@ -15,6 +16,7 @@ import com.project.cinemaservice.persistence.repository.ShowtimeRepository;
 import com.project.cinemaservice.service.ShowtimeService;
 import com.project.cinemaservice.service.exception.CinemaRoomOccupiedException;
 import com.project.cinemaservice.service.exception.ShowtimeActionException;
+import com.project.cinemaservice.service.exception.ShowtimeAlreadyStartedException;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -150,12 +152,28 @@ public class ShowtimeServiceImpl implements ShowtimeService {
 
   @Transactional
   @Override
-  public ShowtimeAdminResponse getShowtimeById(Long showtimeId) {
+  public ShowtimeAdminResponse getShowtimeByIdForAdmin(Long showtimeId) {
     Showtime showtime = findShowtimeEntityById(showtimeId);
     List<RoomSeatBriefInfo> bookedSeatsByShowtime =
         orderTicketRepository.findAllByTicketShowtimeAndOrderStatusReservedOrPaid(showtimeId);
 
     return showtimeMapper.toShowtimeAdminResponse(showtime, bookedSeatsByShowtime);
+  }
+
+  @Transactional
+  @Override
+  public ShowtimeClientResponse getShowtimeByIdForClient(Long showtimeId) {
+    Showtime showtime = findShowtimeEntityById(showtimeId);
+
+    if (showtime.getStartDate().isBefore(LocalDateTime.now())) {
+      throw new ShowtimeAlreadyStartedException(
+          String.format("Showtime with id=%d already passed", showtimeId));
+    }
+
+    List<RoomSeatBriefInfo> bookedSeatsByShowtime =
+        orderTicketRepository.findAllByTicketShowtimeAndOrderStatusReservedOrPaid(showtimeId);
+
+    return showtimeMapper.toShowtimeClientResponse(showtime, bookedSeatsByShowtime);
   }
 
   private Showtime findShowtimeEntityById(Long showtimeId) {

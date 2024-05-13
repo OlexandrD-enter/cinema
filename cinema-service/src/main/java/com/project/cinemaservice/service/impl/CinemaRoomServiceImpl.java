@@ -41,7 +41,8 @@ public class CinemaRoomServiceImpl implements CinemaRoomService {
     Cinema cinema = cinemaRepository.findById(cinemaId).orElseThrow(
         () -> new EntityNotFoundException(String.format("Cinema with id=%d not found", cinemaId)));
 
-    CinemaRoom cinemaRoom = cinemaRoomMapper.toCinemaRoomEntity(cinemaRoomCreateRequest, cinema);
+    CinemaRoom cinemaRoom = cinemaRoomMapper.toCinemaRoomEntity(cinemaRoomCreateRequest);
+    cinemaRoom.setCinema(cinema);
     CinemaRoom savedCinemaRoom = cinemaRoomRepository.save(cinemaRoom);
 
     log.debug("Created cinemaRoom with name {}", cinemaRoomName);

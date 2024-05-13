@@ -67,7 +67,7 @@ public class CinemaRoomServiceImplTest {
     when(cinemaRepository.findById(cinemaId)).thenReturn(Optional.of(cinema));
     when(cinemaRoomRepository.findByNameAndCinemaId(roomName, cinemaId)).thenReturn(
         Optional.empty());
-    when(cinemaRoomMapper.toCinemaRoomEntity(request, cinema)).thenReturn(cinemaRoom);
+    when(cinemaRoomMapper.toCinemaRoomEntity(request)).thenReturn(cinemaRoom);
     when(cinemaRoomRepository.save(cinemaRoom)).thenReturn(cinemaRoom);
     when(cinemaRoomMapper.toCinemaRoomAdminResponse(cinemaRoom)).thenReturn(expectedResponse);
 

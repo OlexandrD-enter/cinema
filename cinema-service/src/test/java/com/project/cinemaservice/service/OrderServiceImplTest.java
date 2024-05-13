@@ -9,13 +9,17 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.project.cinemaservice.domain.dto.movie.MovieFileResponseUrl;
+import com.project.cinemaservice.domain.dto.order.OrderBriefInfo;
+import com.project.cinemaservice.domain.dto.order.OrderBriefInfoAdmin;
 import com.project.cinemaservice.domain.dto.order.OrderClientDetails;
 import com.project.cinemaservice.domain.dto.order.OrderClientResponse;
 import com.project.cinemaservice.domain.dto.order.OrderCreateRequest;
 import com.project.cinemaservice.domain.dto.order.OrderDetails;
+import com.project.cinemaservice.domain.dto.order.OrderFilterRequest;
 import com.project.cinemaservice.domain.dto.order.OrderStatusDetails;
 import com.project.cinemaservice.domain.dto.roomseat.RoomSeatBriefInfo;
 import com.project.cinemaservice.domain.mapper.OrderMapper;
@@ -33,12 +37,16 @@ import com.project.cinemaservice.persistence.repository.OrderTicketRepository;
 import com.project.cinemaservice.persistence.repository.RoomSeatRepository;
 import com.project.cinemaservice.persistence.repository.ShowtimeRepository;
 import com.project.cinemaservice.persistence.repository.TicketRepository;
+import com.project.cinemaservice.service.exception.CancellationTimeIsUpException;
+import com.project.cinemaservice.service.exception.DateViolationException;
 import com.project.cinemaservice.service.exception.ForbiddenOperationException;
 import com.project.cinemaservice.service.exception.IllegalOrderStatusException;
+import com.project.cinemaservice.service.exception.PriceViolationException;
 import com.project.cinemaservice.service.exception.RoomSeatAlreadyBookedException;
 import com.project.cinemaservice.service.exception.ShowtimeAlreadyStartedException;
 import com.project.cinemaservice.service.impl.OrderServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,6 +60,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -344,6 +355,7 @@ public class OrderServiceImplTest {
   void cancelOrder_Success() {
     // Given
     Order order = new Order();
+    order.setId(1L);
     AuditEntity auditEntity = new AuditEntity();
     auditEntity.setCreatedBy("demchenko@gmail.com");
     order.setOrderStatus(OrderStatus.RESERVED);
@@ -356,6 +368,8 @@ public class OrderServiceImplTest {
     when(orderStatusTransitionsMap.get(OrderStatus.CANCELLED)).thenReturn(
         Collections.singleton(OrderStatus.RESERVED));
     when(orderPaymentDetailsRepository.save(any())).thenReturn(orderPaymentDetails);
+    when(showtimeRepository.findStartDateOfShowtimeByOrderId(1L)).thenReturn(
+        LocalDateTime.now().plusHours(4));
     when(orderMapper.toOrderStatusDetails(any())).thenReturn(new OrderStatusDetails());
 
     Collection<GrantedAuthority> authorities = Collections.singletonList(() -> "ROLE_ADMIN");
@@ -397,5 +411,123 @@ public class OrderServiceImplTest {
 
     // When & Then
     assertThrows(EntityNotFoundException.class, () -> orderService.cancelOrder(1L));
+  }
+
+  @Test
+  void cancelOrder_CancellationTimeToLate_ThrowsCancellationTimeIsUpException() {
+    // Given
+    Order order = new Order();
+    order.setId(1L);
+    AuditEntity auditEntity = new AuditEntity();
+    auditEntity.setCreatedBy("demchenko@gmail.com");
+    order.setOrderStatus(OrderStatus.RESERVED);
+    order.setAuditEntity(auditEntity);
+    OrderPaymentDetails orderPaymentDetails = new OrderPaymentDetails();
+    orderPaymentDetails.setOrder(order);
+
+    when(orderPaymentDetailsRepository.findByOrderId(1L)).thenReturn(
+        Optional.of(orderPaymentDetails));
+    when(orderStatusTransitionsMap.get(OrderStatus.CANCELLED)).thenReturn(
+        Collections.singleton(OrderStatus.RESERVED));
+    when(showtimeRepository.findStartDateOfShowtimeByOrderId(1L)).thenReturn(LocalDateTime.now());
+
+    Collection<GrantedAuthority> authorities = Collections.singletonList(() -> "ROLE_ADMIN");
+    Authentication authentication = new UsernamePasswordAuthenticationToken("demchenko@gmail.com",
+        "password", authorities);
+    SecurityContext securityContext = mock(SecurityContext.class);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    SecurityContextHolder.setContext(securityContext);
+
+    // When & Then
+    assertThrows(CancellationTimeIsUpException.class, () -> orderService.cancelOrder(1L));
+  }
+
+  @Test
+  void getAllOrdersForClient_Success() {
+    // Given
+    Pageable pageable = Pageable.unpaged();
+    List<OrderBriefInfo> orderBriefInfos = new ArrayList<>();
+    orderBriefInfos.add(new OrderBriefInfo(1L, LocalDateTime.now(), OrderStatus.RESERVED,
+        "Cinema Name", "Cinema City", "Cinema Address", "Movie Name",
+        LocalDateTime.now(), BigDecimal.valueOf(100.00)));
+    Page<OrderBriefInfo> expectedPage = new PageImpl<>(orderBriefInfos);
+
+    when(orderRepository.findAllUserOrders(pageable, "testUser")).thenReturn(expectedPage);
+    Authentication authentication = new UsernamePasswordAuthenticationToken("testUser", null);
+    SecurityContext securityContext = mock(SecurityContext.class);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    SecurityContextHolder.setContext(securityContext);
+    // When
+    Page<OrderBriefInfo> resultPage = orderService.getAllOrdersForClient(pageable);
+
+    // Then
+    assertEquals(expectedPage, resultPage);
+    verify(orderRepository, times(1)).findAllUserOrders(pageable, "testUser");
+  }
+
+  @Test
+  void getAllOrdersByFilter_Success() {
+    // Given
+    Pageable pageable = Pageable.unpaged();
+    List<OrderBriefInfo> orderBriefInfos = new ArrayList<>();
+    orderBriefInfos.add(new OrderBriefInfo(1L, LocalDateTime.now(), OrderStatus.RESERVED,
+        "Cinema Name", "Cinema City", "Cinema Address", "Movie Name",
+        LocalDateTime.now(), BigDecimal.valueOf(100.00)));
+    Page<OrderBriefInfo> expectedPage = new PageImpl<>(orderBriefInfos);
+
+    LocalDateTime minCreationDate = LocalDateTime.of(2022, 1, 1, 0, 0);
+    LocalDateTime maxCreationDate = LocalDateTime.of(2022, 12, 31, 23, 59);
+    BigDecimal minTotalSum = BigDecimal.valueOf(50.00);
+    BigDecimal maxTotalSum = BigDecimal.valueOf(200.00);
+
+    OrderBriefInfoAdmin expectedAdminInfo = new OrderBriefInfoAdmin(expectedPage,
+        minCreationDate, maxCreationDate, minTotalSum, maxTotalSum);
+
+    OrderFilterRequest orderFilterRequest = new OrderFilterRequest();
+    orderFilterRequest.setFromOrderCreationTime(minCreationDate);
+    orderFilterRequest.setToOrderCreationTime(maxCreationDate);
+    orderFilterRequest.setFromPrice(minTotalSum);
+    orderFilterRequest.setToPrice(maxTotalSum);
+
+    when(orderRepository.findAllOrders(pageable, orderFilterRequest)).thenReturn(expectedAdminInfo);
+
+    // When
+    OrderBriefInfoAdmin resultAdminInfo = orderService.getAllOrdersByFilter(pageable, orderFilterRequest);
+
+    // Then
+    assertEquals(expectedAdminInfo, resultAdminInfo);
+    verify(orderRepository, times(1)).findAllOrders(pageable, orderFilterRequest);
+  }
+
+  @Test
+  void getAllOrdersByFilter_InvalidPriceRange_ThrowsPriceViolationException() {
+    // Given
+    OrderFilterRequest invalidFilterRequest = new OrderFilterRequest();
+    invalidFilterRequest.setFromPrice(BigDecimal.valueOf(100));
+    invalidFilterRequest.setToPrice(BigDecimal.valueOf(50));
+
+    Pageable pageable = Pageable.unpaged();
+
+    // When & Then
+    assertThrows(PriceViolationException.class, () -> {
+      orderService.getAllOrdersByFilter(pageable, invalidFilterRequest);
+    });
+    verifyNoInteractions(orderRepository);
+  }
+
+  @Test
+  void getAllOrdersByFilter_InvalidDateRange_ThrowsDateViolationException() {
+    // Given
+    OrderFilterRequest invalidFilterRequest = new OrderFilterRequest();
+    invalidFilterRequest.setFromOrderCreationTime(LocalDateTime.of(2022, 1, 1, 0, 0));
+    invalidFilterRequest.setToOrderCreationTime(LocalDateTime.of(2021, 12, 31, 23, 59));
+
+    Pageable pageable = Pageable.unpaged();
+
+    // When & Then
+    assertThrows(DateViolationException.class, () -> {
+      orderService.getAllOrdersByFilter(pageable, invalidFilterRequest);
+    });
+    verifyNoInteractions(orderRepository);
   }
 }

@@ -1,6 +1,7 @@
 package com.project.cinemaservice.service;
 
 import com.project.cinemaservice.domain.dto.showtime.ShowtimeAdminResponse;
+import com.project.cinemaservice.domain.dto.showtime.ShowtimeClientResponse;
 import com.project.cinemaservice.domain.dto.showtime.ShowtimeDataRequest;
 
 /**
@@ -14,5 +15,7 @@ public interface ShowtimeService {
 
   void deleteShowtimeById(Long showtimeId);
 
-  ShowtimeAdminResponse getShowtimeById(Long showtimeId);
+  ShowtimeAdminResponse getShowtimeByIdForAdmin(Long showtimeId);
+
+  ShowtimeClientResponse getShowtimeByIdForClient(Long showtimeId);
 }

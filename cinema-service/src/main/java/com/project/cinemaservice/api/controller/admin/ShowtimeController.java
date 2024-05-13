@@ -56,7 +56,7 @@ public class ShowtimeController {
   @GetMapping("/{showtimeId}")
   public ResponseEntity<ShowtimeAdminResponse> getShowtime(
       @PathVariable @Min(1) Long showtimeId) {
-    return ResponseEntity.ok(showtimeService.getShowtimeById(showtimeId));
+    return ResponseEntity.ok(showtimeService.getShowtimeByIdForAdmin(showtimeId));
   }
 
   @Operation(summary = "This method is used to delete the showtime.")

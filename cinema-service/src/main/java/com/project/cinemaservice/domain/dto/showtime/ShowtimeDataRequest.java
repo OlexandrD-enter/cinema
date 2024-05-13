@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -35,6 +34,6 @@ public class ShowtimeDataRequest {
   @DecimalMin(value = "0.00", inclusive = false, message = "price must be greater than 0.00")
   private BigDecimal price;
   @Schema(example = "2024-05-07T13:00:00")
-  @NotEmpty(message = "StartDate must not be null")
+  @NotNull(message = "StartDate must not be null")
   private LocalDateTime startDate;
 }

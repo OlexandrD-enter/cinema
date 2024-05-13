@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
  * Repository interface for managing Order entities in the database.
  */
 @Repository
-public interface OrderRepository extends JpaRepository<Order, Long> {
+public interface OrderRepository extends JpaRepository<Order, Long>, OrderRepositoryCustom {
 
   @Query("SELECT NEW com.project.cinemaservice.domain.dto.order.OrderDetails( "
       + "o.id, o.orderStatus, SUM(st.price), m.name, mf.fileId, o.auditEntity.createdBy) "
@@ -35,5 +35,4 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
       + "LEFT JOIN t.roomSeat rs "
       + "WHERE o.id = :orderId GROUP BY rs.seatNumber")
   List<Long> findBookedRoomSeatNumbers(@Param("orderId") Long orderId);
-
 }

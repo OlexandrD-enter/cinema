@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
  * - PUT /{movieId}: Edit a movie based on request data.<br>
  * - GET /{movieId}: Gets a movie details for admin.<br>
  * - DELETE /{movieId}: Deletes a movie based on request data.<br>
+ * - GET /filters: Get a movies information base on filters.<br>
  */
 @Validated
 @RestController

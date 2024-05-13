@@ -1,5 +1,6 @@
 package com.project.cinemaservice.api.controller;
 
+import com.project.cinemaservice.domain.dto.order.OrderBriefInfo;
 import com.project.cinemaservice.domain.dto.order.OrderClientDetails;
 import com.project.cinemaservice.domain.dto.order.OrderClientResponse;
 import com.project.cinemaservice.domain.dto.order.OrderCreateRequest;
@@ -9,6 +10,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
  * - POST /: Creates a new order based on request data.<br>
  * - GET /{orderId}: Retrieves information about order.<br>
  * - PUT /{orderId}/cancel: Cancel the order.<br>
+ * - GET /: Retrieves all client orders.<br>
  */
 @Validated
 @RestController
@@ -56,5 +60,11 @@ public class OrderClientController {
   public ResponseEntity<OrderStatusDetails> cancelOrder(
       @PathVariable @Min(1) Long orderId) {
     return ResponseEntity.ok().body(orderService.cancelOrder(orderId));
+  }
+
+  @Operation(summary = "This method is used to get all client orders.")
+  @GetMapping
+  public ResponseEntity<Page<OrderBriefInfo>> getAllOrders(Pageable pageable) {
+    return ResponseEntity.status(HttpStatus.OK).body(orderService.getAllOrdersForClient(pageable));
   }
 }

@@ -1,10 +1,13 @@
 package com.project.cinemaservice.service.impl;
 
 import com.project.cinemaservice.domain.dto.movie.MovieFileResponseUrl;
+import com.project.cinemaservice.domain.dto.order.OrderBriefInfo;
+import com.project.cinemaservice.domain.dto.order.OrderBriefInfoAdmin;
 import com.project.cinemaservice.domain.dto.order.OrderClientDetails;
 import com.project.cinemaservice.domain.dto.order.OrderClientResponse;
 import com.project.cinemaservice.domain.dto.order.OrderCreateRequest;
 import com.project.cinemaservice.domain.dto.order.OrderDetails;
+import com.project.cinemaservice.domain.dto.order.OrderFilterRequest;
 import com.project.cinemaservice.domain.dto.order.OrderStatusDetails;
 import com.project.cinemaservice.domain.dto.roomseat.RoomSeatBriefInfo;
 import com.project.cinemaservice.domain.mapper.OrderMapper;
@@ -27,11 +30,14 @@ import com.project.cinemaservice.service.MediaServiceClient;
 import com.project.cinemaservice.service.OrderService;
 import com.project.cinemaservice.service.PaymentServiceClient;
 import com.project.cinemaservice.service.exception.CancellationTimeIsUpException;
+import com.project.cinemaservice.service.exception.DateViolationException;
 import com.project.cinemaservice.service.exception.ForbiddenOperationException;
 import com.project.cinemaservice.service.exception.IllegalOrderStatusException;
+import com.project.cinemaservice.service.exception.PriceViolationException;
 import com.project.cinemaservice.service.exception.RoomSeatAlreadyBookedException;
 import com.project.cinemaservice.service.exception.ShowtimeAlreadyStartedException;
 import jakarta.persistence.EntityNotFoundException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -39,6 +45,8 @@ import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -213,6 +221,22 @@ public class OrderServiceImpl implements OrderService {
     return orderMapper.toOrderStatusDetails(paymentDetails.getOrder());
   }
 
+  @Transactional
+  @Override
+  public Page<OrderBriefInfo> getAllOrdersForClient(Pageable pageable) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    return orderRepository.findAllUserOrders(pageable, authentication.getName());
+  }
+
+  @Transactional
+  @Override
+  public OrderBriefInfoAdmin getAllOrdersByFilter(Pageable pageable,
+      OrderFilterRequest orderFilterRequest) {
+    validateFilterRequestData(orderFilterRequest);
+
+    return orderRepository.findAllOrders(pageable, orderFilterRequest);
+  }
+
   private void checkIfRoomSeatsAvailableForOrder(Long showtimeId, List<Long> roomSeatIds) {
 
     List<RoomSeatBriefInfo> bookedSeatsByShowtime =
@@ -254,11 +278,42 @@ public class OrderServiceImpl implements OrderService {
   }
 
   private void checkIfCancellationTimeIsCorrect(Order order) {
-    LocalDateTime startDateOfShowtimeByOrderId = showtimeRepository.findStartDateOfShowtimeByOrderId(
-        order.getId());
+    LocalDateTime startDateOfShowtimeByOrderId =
+        showtimeRepository.findStartDateOfShowtimeByOrderId(order.getId());
     if (LocalDateTime.now().plusHours(1).isAfter(startDateOfShowtimeByOrderId)) {
       throw new CancellationTimeIsUpException(
           String.format("It`s to late to cancel order with id=%d", order.getId()));
+    }
+  }
+
+  private void validateFilterRequestData(OrderFilterRequest orderFilterRequest) {
+    validatePriceRangeFromFilterRequest(orderFilterRequest);
+    validateDateRangeFromFilterRequest(orderFilterRequest);
+  }
+
+  private void validatePriceRangeFromFilterRequest(OrderFilterRequest orderFilterRequest) {
+    BigDecimal fromPrice = orderFilterRequest.getFromPrice();
+    BigDecimal toPrice = orderFilterRequest.getToPrice();
+
+    if (fromPrice != null && toPrice != null && fromPrice.compareTo(toPrice) > 0) {
+      throw new PriceViolationException("'From price' should be lower than 'To price'");
+    } else if ((fromPrice == null && toPrice != null) || (fromPrice != null && toPrice == null)) {
+      throw new PriceViolationException("Both 'From price' and 'To price' must be provided");
+    }
+  }
+
+  private void validateDateRangeFromFilterRequest(OrderFilterRequest orderFilterRequest) {
+    LocalDateTime fromCreationTime = orderFilterRequest.getFromOrderCreationTime();
+    LocalDateTime toCreationTime = orderFilterRequest.getToOrderCreationTime();
+
+    if (fromCreationTime != null && toCreationTime != null
+        && fromCreationTime.isAfter(toCreationTime)) {
+      throw new DateViolationException(
+          "'From creation time' should be lower than 'To creation time'");
+    } else if ((fromCreationTime == null && toCreationTime != null) || (fromCreationTime != null
+        && toCreationTime == null)) {
+      throw new DateViolationException(
+          "Both 'From creation time' and 'To creation time' must be provided");
     }
   }
 }

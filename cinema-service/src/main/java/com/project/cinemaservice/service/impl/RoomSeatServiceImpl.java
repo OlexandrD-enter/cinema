@@ -40,7 +40,8 @@ public class RoomSeatServiceImpl implements RoomSeatService {
     CinemaRoom cinemaRoom = cinemaRoomRepository.findById(roomId).orElseThrow(
         () -> new EntityNotFoundException(String.format("Room with id=%d not found", roomId)));
 
-    RoomSeat roomSeat = roomSeatMapper.toRoomSeatEntity(roomSeatDataRequest, cinemaRoom);
+    RoomSeat roomSeat = roomSeatMapper.toRoomSeatEntity(roomSeatDataRequest);
+    roomSeat.setCinemaRoom(cinemaRoom);
     RoomSeat savedRoomSeat = roomSeatRepository.save(roomSeat);
 
     log.debug("Created RoomSeat with seatNumber {} in room {}", seatNumber, roomId);
