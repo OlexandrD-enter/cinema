@@ -23,7 +23,11 @@ public class SecurityConfiguration {
   private final JwtAuthConverter jwtAuthConverter;
 
   private static final String[] AUTH_WHITELIST = {
-      "/api/v1/payments/stripe/events/**"
+      "/api/v1/payments/stripe/events/**",
+      // -- Swagger UI v3 (OpenAPI)
+      "/swagger-resources/**",
+      "/v3/api-docs/**",
+      "/swagger-ui/**"
   };
 
   /**

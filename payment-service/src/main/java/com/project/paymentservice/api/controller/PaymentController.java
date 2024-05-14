@@ -35,6 +35,7 @@ public class PaymentController {
     return ResponseEntity.ok(stripeService.pay(paymentRequest));
   }
 
+  @Operation(summary = "This method is used as webhook which listen stripe events")
   @PostMapping("/stripe/events")
   public void handleStripeEvent(@RequestBody String payload,
       @RequestHeader("Stripe-Signature") String sigHeader) {

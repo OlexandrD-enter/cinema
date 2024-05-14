@@ -16,3 +16,12 @@ rabbitmq:
 #minutes
 email:
   retry-interval-time: ${RETRY_INTERVAL_TIME}
+
+
+springdoc:
+  swagger-ui:
+    title: CINEMA API
+
+    description: "User service is a microservice which a part of cinema system and responsible for users:\n
+                - Registration\n
+                - Email verification\n"

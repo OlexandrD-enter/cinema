@@ -5,7 +5,6 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -22,7 +21,11 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfiguration {
 
   private static final String[] AUTH_WHITELIST = {
-
+      "/api/v1/files/**",
+      // -- Swagger UI v3 (OpenAPI)
+      "/swagger-resources/**",
+      "/v3/api-docs/**",
+      "/swagger-ui/**"
   };
 
   private final JwtAuthConverter jwtAuthConverter;
@@ -41,7 +44,7 @@ public class SecurityConfiguration {
         .authorizeHttpRequests(
             authorizeRequests ->
                 authorizeRequests
-                    .requestMatchers(HttpMethod.GET, "/api/v1/files/**")
+                    .requestMatchers(AUTH_WHITELIST)
                     .permitAll()
                     .anyRequest()
                     .authenticated())

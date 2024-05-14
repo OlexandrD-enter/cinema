@@ -21,7 +21,11 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfiguration {
 
   private static final String[] AUTH_WHITELIST = {
-      "/api/v1/movies/**"
+      "/api/v1/movies/**",
+      // -- Swagger UI v3 (OpenAPI)
+      "/swagger-resources/**",
+      "/v3/api-docs/**",
+      "/swagger-ui/**"
   };
 
   private final JwtAuthConverter jwtAuthConverter;

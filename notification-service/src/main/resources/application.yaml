@@ -18,3 +18,10 @@ rabbitmq:
 email:
   source-address: ${EMAIL_SOURCE_ADDRESS}
   verification-url: ${EMAIL_VERIFICATION_URL}
+
+springdoc:
+  swagger-ui:
+    title: CINEMA API
+
+    description: "Notification service is a microservice which a part of cinema system and responsible for sending notification:\n
+                - Email verification notification\n"

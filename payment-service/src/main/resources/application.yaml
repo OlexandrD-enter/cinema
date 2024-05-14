@@ -13,3 +13,11 @@ rabbitmq:
    payment:
       exchange: payment.confirm.exchange
       routing-key: payment.confirm
+
+springdoc:
+  swagger-ui:
+    title: CINEMA API
+
+    description: "Payment service is a microservice which a part of cinema system and responsible for payments:\n
+                - pay for order\n
+                - refund payment for order\n"

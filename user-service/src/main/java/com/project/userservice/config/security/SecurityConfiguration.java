@@ -1,6 +1,5 @@
 package com.project.userservice.config.security;
 
-import static org.springframework.security.config.Customizer.withDefaults;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 import lombok.RequiredArgsConstructor;
@@ -26,6 +25,10 @@ public class SecurityConfiguration {
       "/api/v1/users/register",
       "/api/v1/users/email-confirm/**",
       "/api/v1/users/resend/email-confirmation/**",
+      // -- Swagger UI v3 (OpenAPI)
+      "/swagger-resources/**",
+      "/v3/api-docs/**",
+      "/swagger-ui/**"
   };
 
   private final JwtAuthConverter jwtAuthConverter;

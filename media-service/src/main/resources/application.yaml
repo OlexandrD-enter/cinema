@@ -15,3 +15,12 @@ aws:
     bucket: ${AWS_S3_BUCKET}
     #minutes
     link-expiration: ${AWS_S3_LINK_EXPIRATION}
+
+springdoc:
+  swagger-ui:
+    title: CINEMA API
+
+    description: "Media service is a microservice which a part of cinema system and responsible for file management:\n
+                - Save file \n
+                - Get file \n
+                - Delete file \n"

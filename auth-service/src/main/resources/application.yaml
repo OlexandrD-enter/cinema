@@ -13,3 +13,12 @@ spring:
 
 server:
   port: 8090
+
+springdoc:
+  swagger-ui:
+    title: CINEMA API
+
+    description: "Authentication service is a microservice which a part of cinema system and responsible for:\n
+                - Login \n
+                - Logout \n
+                - Refresh access token \n"
