@@ -54,6 +54,8 @@ public class MovieEditRequest {
   private LocalDateTime realiseDate;
   /*@NotNull(message = "Not valid duration")*/
   private Duration duration;
+
+  private Boolean isPublish;
   /* @Schema(example = "[1, 2, 3]")
    @NotNull(message = "Not valid movieGenreIds")*/
   private List<Long> movieGenreIds;

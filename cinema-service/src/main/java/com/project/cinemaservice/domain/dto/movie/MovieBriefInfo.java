@@ -1,7 +1,5 @@
 package com.project.cinemaservice.domain.dto.movie;
 
-import com.project.cinemaservice.persistence.model.Genre;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,19 +7,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Represents filters for querying movies.
+ * Represents a brief info about movie showtime.
  */
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Getter
 @Setter
-public class MovieFilters {
+public class MovieBriefInfo {
 
-  private List<Genre> genres;
-  private String country;
-  private String language;
-  private Integer minAge;
-  private Integer maxAge;
+  private Long id;
   private Boolean isPublish;
 }

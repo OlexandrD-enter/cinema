@@ -1,10 +1,11 @@
 package com.project.cinemaservice.api.controller.admin;
 
 import com.project.cinemaservice.domain.dto.movie.MovieAdminResponse;
+import com.project.cinemaservice.domain.dto.movie.MovieBriefInfo;
 import com.project.cinemaservice.domain.dto.movie.MovieDataRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieEditRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieFiltersRequest;
-import com.project.cinemaservice.domain.dto.movie.MoviePageDetailsResponse;
+import com.project.cinemaservice.domain.dto.movie.MoviePageDetailsAdminResponse;
 import com.project.cinemaservice.service.MovieService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -32,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
  * - PUT /{movieId}: Edit a movie based on request data.<br>
  * - GET /{movieId}: Gets a movie details for admin.<br>
  * - DELETE /{movieId}: Deletes a movie based on request data.<br>
+ * - PUT /{movieId}/status: Change movie status based on request data.<br>
  * - GET /filters: Get a movies information base on filters.<br>
  */
 @Validated
@@ -73,12 +76,21 @@ public class MovieController {
     return ResponseEntity.status(HttpStatus.OK).build();
   }
 
+  @Operation(summary = "This method is used to change movie status.")
+  @PutMapping("/{movieId}/status")
+  public ResponseEntity<MovieBriefInfo> changeMoviePublishStatus(
+      @PathVariable @Min(1) Long movieId,
+      @RequestParam(value = "is_published") boolean isPublished) {
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(movieService.changeMovieStatus(movieId, isPublished));
+  }
+
   @Operation(summary = "This method is used to get all movies by filters.")
   @GetMapping("/filters")
-  public ResponseEntity<Page<MoviePageDetailsResponse>> getAllMovies(
+  public ResponseEntity<Page<MoviePageDetailsAdminResponse>> getAllMovies(
       Pageable pageable,
       @RequestBody @Valid MovieFiltersRequest movieFiltersRequest) {
     return ResponseEntity.status(HttpStatus.OK)
-        .body(movieService.getAllMoviesByFilter(pageable, movieFiltersRequest));
+        .body(movieService.getAllMoviesByFiltersForAdmin(pageable, movieFiltersRequest));
   }
 }

@@ -30,6 +30,8 @@ public class MoviePageDetails {
 
   private LocalDateTime realiseDate;
 
+  private Boolean isPublish;
+
   private Long fileId;
 
   private List<String> movieGenres;

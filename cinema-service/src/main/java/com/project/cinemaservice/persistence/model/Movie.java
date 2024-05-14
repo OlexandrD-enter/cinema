@@ -66,6 +66,9 @@ public class Movie {
   @Column(name = "duration")
   private Duration duration;
 
+  @Column(name = "is_publish")
+  private Boolean isPublish;
+
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "movie", cascade = CascadeType.ALL,
       orphanRemoval = true)
   @OnDelete(action = OnDeleteAction.CASCADE)

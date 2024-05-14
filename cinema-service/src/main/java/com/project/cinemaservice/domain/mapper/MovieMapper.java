@@ -1,17 +1,21 @@
 package com.project.cinemaservice.domain.mapper;
 
 import com.project.cinemaservice.domain.dto.movie.MovieAdminResponse;
+import com.project.cinemaservice.domain.dto.movie.MovieBriefInfo;
 import com.project.cinemaservice.domain.dto.movie.MovieClientResponse;
 import com.project.cinemaservice.domain.dto.movie.MovieDataRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieEditRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieFilters;
 import com.project.cinemaservice.domain.dto.movie.MovieFiltersRequest;
 import com.project.cinemaservice.domain.dto.movie.MoviePageDetails;
+import com.project.cinemaservice.domain.dto.movie.MoviePageDetailsAdminResponse;
 import com.project.cinemaservice.domain.dto.movie.MoviePageDetailsResponse;
 import com.project.cinemaservice.persistence.model.Genre;
 import com.project.cinemaservice.persistence.model.Movie;
 import com.project.cinemaservice.persistence.model.MovieGenre;
 import java.util.List;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -41,6 +45,12 @@ public interface MovieMapper {
 
   MoviePageDetailsResponse toMoviePageDetailsResponse(MoviePageDetails moviePageDetails,
       String previewUrl);
+
+  @BeanMapping(builder = @Builder(disableBuilder = true))
+  MoviePageDetailsAdminResponse toMoviePageDetailsAdminResponse(MoviePageDetails moviePageDetails,
+      String previewUrl);
+
+  MovieBriefInfo toMovieBriefInfo(Movie movie);
 
   /**
    * Maps a list of MovieGenre entities to a list of genre names.

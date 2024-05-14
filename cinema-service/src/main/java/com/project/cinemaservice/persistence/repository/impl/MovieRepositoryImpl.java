@@ -65,6 +65,7 @@ public class MovieRepositoryImpl extends QuerydslRepositorySupport implements
             qMovie.language,
             qMovie.country,
             qMovie.realiseDate,
+            qMovie.isPublish,
             qMovieFile.fileId
         )
         .from(qMovie)
@@ -109,6 +110,7 @@ public class MovieRepositoryImpl extends QuerydslRepositorySupport implements
               tuple.get(qMovie.language),
               tuple.get(qMovie.country),
               tuple.get(qMovie.realiseDate),
+              tuple.get(qMovie.isPublish),
               tuple.get(qMovieFile.fileId),
               genreNamesList,
               showtimeDates
@@ -127,6 +129,10 @@ public class MovieRepositoryImpl extends QuerydslRepositorySupport implements
    */
   public Predicate getPredicateBasedOnFilters(MovieFilters movieFilters) {
     BooleanBuilder predicateBuilder = new BooleanBuilder();
+
+    if (Objects.nonNull(movieFilters.getIsPublish())) {
+      predicateBuilder.and(qMovie.isPublish.eq(movieFilters.getIsPublish()));
+    }
 
     if (Objects.nonNull(movieFilters.getGenres()) && !movieFilters.getGenres().isEmpty()) {
       predicateBuilder.and(qMovie.id.in(getMovieIdsByGenres(movieFilters.getGenres())));

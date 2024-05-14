@@ -453,7 +453,7 @@ public class MovieServiceImplTest {
     when(mediaServiceClient.getFile(1L)).thenReturn(previewResponseUrl);
 
     // When
-    Page<MoviePageDetailsResponse> result = movieService.getAllMoviesByFilter(pageable,
+    Page<MoviePageDetailsResponse> result = movieService.getAllMoviesByFiltersForClient(pageable,
         movieFiltersRequest);
 
     // Then
@@ -475,7 +475,7 @@ public class MovieServiceImplTest {
 
     // When & Then
     assertThrows(EntityNotFoundException.class,
-        () -> movieService.getAllMoviesByFilter(pageable,
+        () -> movieService.getAllMoviesByFiltersForClient(pageable,
             movieFiltersRequest));
   }
 
@@ -500,7 +500,7 @@ public class MovieServiceImplTest {
     when(genreRepository.findAllById(movieFiltersRequest.getGenreIds())).thenReturn(genres);
 
     // When & Then
-    assertThrows(AgeViolationException.class, () -> movieService.getAllMoviesByFilter(pageable,
+    assertThrows(AgeViolationException.class, () -> movieService.getAllMoviesByFiltersForClient(pageable,
         movieFiltersRequest));
   }
 
@@ -532,9 +532,9 @@ public class MovieServiceImplTest {
     // When & Then
     assertAll(
         () -> assertThrows(AgeViolationException.class,
-            () -> movieService.getAllMoviesByFilter(pageable, movieFiltersRequest1)),
+            () -> movieService.getAllMoviesByFiltersForClient(pageable, movieFiltersRequest1)),
         () -> assertThrows(AgeViolationException.class,
-            () -> movieService.getAllMoviesByFilter(pageable, movieFiltersRequest2))
+            () -> movieService.getAllMoviesByFiltersForClient(pageable, movieFiltersRequest2))
     );
   }
 }

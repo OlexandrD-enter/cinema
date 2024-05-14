@@ -15,6 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class MovieAdminResponse extends MovieClientResponse {
 
+  private Boolean isPublish;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
   private String createdBy;

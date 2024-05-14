@@ -45,6 +45,6 @@ public class MovieClientController {
       Pageable pageable,
       @RequestBody @Valid MovieFiltersRequest movieFiltersRequest) {
     return ResponseEntity.status(HttpStatus.OK)
-        .body(movieService.getAllMoviesByFilter(pageable, movieFiltersRequest));
+        .body(movieService.getAllMoviesByFiltersForClient(pageable, movieFiltersRequest));
   }
 }

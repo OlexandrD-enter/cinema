@@ -1,6 +1,7 @@
 package com.project.cinemaservice.service.impl;
 
 import com.project.cinemaservice.domain.dto.movie.MovieAdminResponse;
+import com.project.cinemaservice.domain.dto.movie.MovieBriefInfo;
 import com.project.cinemaservice.domain.dto.movie.MovieClientResponse;
 import com.project.cinemaservice.domain.dto.movie.MovieDataRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieEditRequest;
@@ -9,6 +10,7 @@ import com.project.cinemaservice.domain.dto.movie.MovieFileResponse;
 import com.project.cinemaservice.domain.dto.movie.MovieFilters;
 import com.project.cinemaservice.domain.dto.movie.MovieFiltersRequest;
 import com.project.cinemaservice.domain.dto.movie.MoviePageDetails;
+import com.project.cinemaservice.domain.dto.movie.MoviePageDetailsAdminResponse;
 import com.project.cinemaservice.domain.dto.movie.MoviePageDetailsResponse;
 import com.project.cinemaservice.domain.mapper.MovieMapper;
 import com.project.cinemaservice.persistence.enums.MovieFileType;
@@ -24,6 +26,7 @@ import com.project.cinemaservice.service.MediaServiceClient;
 import com.project.cinemaservice.service.MovieService;
 import com.project.cinemaservice.service.exception.AgeViolationException;
 import com.project.cinemaservice.service.exception.EntityAlreadyExistsException;
+import com.project.cinemaservice.service.exception.MoviePublishException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -63,6 +66,7 @@ public class MovieServiceImpl implements MovieService {
     checkIfMovieExistByName(movieName);
 
     Movie movie = createMovieEntity(movieDataRequest);
+    movie.setIsPublish(false);
 
     saveMovieGenres(movie, movieDataRequest.getMovieGenreIds());
 
@@ -131,6 +135,10 @@ public class MovieServiceImpl implements MovieService {
   public MovieClientResponse getMovieForClientById(Long movieId) {
     Movie movie = getMovieEntityById(movieId);
 
+    if (!movie.getIsPublish()) {
+      throw new EntityNotFoundException(String.format("Movie with id=%d not found", movieId));
+    }
+
     String previewFileUrl = getFileUrlByType(movie, MovieFileType.MOVIE_PREVIEW);
     String trailerFileUrl = getFileUrlByType(movie, MovieFileType.MOVIE_TRAILER);
 
@@ -144,6 +152,10 @@ public class MovieServiceImpl implements MovieService {
 
     Movie movie = getMovieEntityById(movieId);
 
+    if (movie.getIsPublish()) {
+      throw new MoviePublishException(String.format("Movie with id=%d published", movieId));
+    }
+
     movieRepository.delete(movie);
 
     movie.getMovieFiles().forEach(movieFile ->
@@ -154,12 +166,13 @@ public class MovieServiceImpl implements MovieService {
 
   @Transactional
   @Override
-  public Page<MoviePageDetailsResponse> getAllMoviesByFilter(Pageable pageable,
+  public Page<MoviePageDetailsResponse> getAllMoviesByFiltersForClient(Pageable pageable,
       MovieFiltersRequest movieFiltersRequest) {
     List<Genre> genres = retrieveGenresFromFilterRequest(movieFiltersRequest);
 
     validateAgeRangeFromFilterRequest(movieFiltersRequest);
     MovieFilters movieFilters = mapFilterRequestToFilters(movieFiltersRequest, genres);
+    movieFilters.setIsPublish(true);
 
     Page<MoviePageDetails> moviePage = movieRepository.findAllByFilters(pageable, movieFilters);
 
@@ -170,6 +183,41 @@ public class MovieServiceImpl implements MovieService {
         }).toList();
 
     return new PageImpl<>(moviePageDetailsList, pageable, moviePage.getTotalElements());
+  }
+
+  @Transactional
+  @Override
+  public Page<MoviePageDetailsAdminResponse> getAllMoviesByFiltersForAdmin(Pageable pageable,
+      MovieFiltersRequest movieFiltersRequest) {
+    List<Genre> genres = retrieveGenresFromFilterRequest(movieFiltersRequest);
+
+    validateAgeRangeFromFilterRequest(movieFiltersRequest);
+    MovieFilters movieFilters = mapFilterRequestToFilters(movieFiltersRequest, genres);
+
+    Page<MoviePageDetails> moviePage = movieRepository.findAllByFilters(pageable, movieFilters);
+
+    List<MoviePageDetailsAdminResponse> moviePageDetailsList = moviePage.stream()
+        .map(movie -> {
+          String previewUrl = getFileAccessUrl(movie.getFileId());
+          return movieMapper.toMoviePageDetailsAdminResponse(movie, previewUrl);
+        }).toList();
+
+    return new PageImpl<>(moviePageDetailsList, pageable, moviePage.getTotalElements());
+  }
+
+  @Transactional
+  @Override
+  public MovieBriefInfo changeMovieStatus(Long movieId, boolean movieStatus) {
+    log.debug("Changing movie status with id {}", movieId);
+
+    Movie movie = getMovieEntityById(movieId);
+    movie.setIsPublish(movieStatus);
+
+    Movie savedMovie = movieRepository.save(movie);
+
+    log.debug("Changed movie status with id {} to {}", movieId, movieStatus);
+
+    return movieMapper.toMovieBriefInfo(savedMovie);
   }
 
   private MovieFilters mapFilterRequestToFilters(MovieFiltersRequest movieFiltersRequest,
