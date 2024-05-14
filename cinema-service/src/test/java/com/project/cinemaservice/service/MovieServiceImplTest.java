@@ -4,21 +4,26 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.project.cinemaservice.domain.dto.movie.MovieAdminResponse;
+import com.project.cinemaservice.domain.dto.movie.MovieBriefInfo;
 import com.project.cinemaservice.domain.dto.movie.MovieClientResponse;
 import com.project.cinemaservice.domain.dto.movie.MovieDataRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieEditRequest;
 import com.project.cinemaservice.domain.dto.movie.MovieFileResponse;
 import com.project.cinemaservice.domain.dto.movie.MovieFileResponseUrl;
+import com.project.cinemaservice.domain.dto.movie.MovieFilters;
 import com.project.cinemaservice.domain.dto.movie.MovieFiltersRequest;
 import com.project.cinemaservice.domain.dto.movie.MoviePageDetails;
+import com.project.cinemaservice.domain.dto.movie.MoviePageDetailsAdminResponse;
 import com.project.cinemaservice.domain.dto.movie.MoviePageDetailsResponse;
 import com.project.cinemaservice.domain.mapper.MovieMapper;
 import com.project.cinemaservice.persistence.enums.MovieFileType;
@@ -32,6 +37,7 @@ import com.project.cinemaservice.persistence.repository.MovieGenreRepository;
 import com.project.cinemaservice.persistence.repository.MovieRepository;
 import com.project.cinemaservice.service.exception.AgeViolationException;
 import com.project.cinemaservice.service.exception.EntityAlreadyExistsException;
+import com.project.cinemaservice.service.exception.MoviePublishException;
 import com.project.cinemaservice.service.impl.MovieServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.ArrayList;
@@ -341,6 +347,7 @@ public class MovieServiceImplTest {
     Movie existingMovie = new Movie();
     existingMovie.setId(movieId);
     existingMovie.setName("Existing Movie");
+    existingMovie.setIsPublish(true);
 
     MovieFile previewMovieFile = new MovieFile();
     previewMovieFile.setFileId(101L);
@@ -377,6 +384,22 @@ public class MovieServiceImplTest {
   }
 
   @Test
+  void getMovieForClientById_WhenIsPublishedFalse_ThrowsEntityNotFoundException() {
+    // Given
+    Long movieId = 1L;
+    Movie existingMovie = new Movie();
+    existingMovie.setId(movieId);
+    existingMovie.setName("Existing Movie");
+    existingMovie.setIsPublish(false);
+
+    when(movieRepository.findById(movieId)).thenReturn(Optional.empty());
+
+    // When & Then
+    assertThrows(EntityNotFoundException.class,
+        () -> movieService.getMovieForClientById(movieId));
+  }
+
+  @Test
   void getMovieForClientById_WhenNotExist_ThrowsEntityNotFoundException() {
     // Given
     Long movieId = 1L;
@@ -394,6 +417,7 @@ public class MovieServiceImplTest {
     Movie existingMovie = new Movie();
     existingMovie.setId(movieId);
     existingMovie.setName("Existing Movie");
+    existingMovie.setIsPublish(false);
 
     MovieFile previewMovieFile = new MovieFile();
     previewMovieFile.setFileId(101L);
@@ -424,7 +448,23 @@ public class MovieServiceImplTest {
   }
 
   @Test
-  void getAllMoviesByFilter_Success() {
+  void deleteMovieById_WhenIsPublishedTrue_ThrowsMoviePublishException() {
+    // Given
+    Long movieId = 1L;
+    Movie existingMovie = new Movie();
+    existingMovie.setId(movieId);
+    existingMovie.setName("Existing Movie");
+    existingMovie.setIsPublish(true);
+
+    when(movieRepository.findById(movieId)).thenReturn(Optional.of(existingMovie));
+
+    // When & Then
+    assertThrows(MoviePublishException.class, () -> movieService.deleteMovieById(movieId));
+    verify(movieRepository, never()).delete(existingMovie);
+  }
+
+  @Test
+  void getAllMoviesByFiltersForClient_Success() {
     // Given
     Pageable pageable = Pageable.unpaged();
     MovieFiltersRequest movieFiltersRequest = new MovieFiltersRequest();
@@ -444,9 +484,13 @@ public class MovieServiceImplTest {
     Page<MoviePageDetailsResponse> expectedMoviePage = new PageImpl<>(
         List.of(MoviePageDetailsResponse.builder().build()));
 
+    MovieFilters movieFilters = new MovieFilters();
+    movieFilters.setGenres(genres);
+
     MovieFileResponseUrl previewResponseUrl = new MovieFileResponseUrl("previewAccessUrl");
 
     when(genreRepository.findAllById(movieFiltersRequest.getGenreIds())).thenReturn(genres);
+    when(movieMapper.toMovieFilters(movieFiltersRequest, genres)).thenReturn(movieFilters);
     when(movieRepository.findAllByFilters(any(), any())).thenReturn(moviePage);
     when(movieMapper.toMoviePageDetailsResponse(any(), anyString())).thenReturn(
         new MoviePageDetailsResponse());
@@ -465,7 +509,7 @@ public class MovieServiceImplTest {
 
 
   @Test
-  void getAllMoviesByFilter_WhenGenresNotFound_ThrowsEntityNotFoundException() {
+  void getAllMoviesByFiltersForClient_WhenGenresNotFound_ThrowsEntityNotFoundException() {
     // Given
     Pageable pageable = Pageable.unpaged();
     MovieFiltersRequest movieFiltersRequest = new MovieFiltersRequest();
@@ -480,7 +524,7 @@ public class MovieServiceImplTest {
   }
 
   @Test
-  void getAllMoviesByFilter_WhenFromAgeGreaterThanToAge_ThrowsAgeViolationException() {
+  void getAllMoviesByFiltersForClient_WhenFromAgeGreaterThanToAge_ThrowsAgeViolationException() {
     // Given
     Pageable pageable = Pageable.unpaged();
     MovieFiltersRequest movieFiltersRequest = new MovieFiltersRequest();
@@ -500,12 +544,13 @@ public class MovieServiceImplTest {
     when(genreRepository.findAllById(movieFiltersRequest.getGenreIds())).thenReturn(genres);
 
     // When & Then
-    assertThrows(AgeViolationException.class, () -> movieService.getAllMoviesByFiltersForClient(pageable,
-        movieFiltersRequest));
+    assertThrows(AgeViolationException.class,
+        () -> movieService.getAllMoviesByFiltersForClient(pageable,
+            movieFiltersRequest));
   }
 
   @Test
-  void getAllMoviesByFilter_WhenFromAgeOrToAgeIsNull_ThrowsAgeViolationException() {
+  void getAllMoviesByFiltersForClient_WhenFromAgeOrToAgeIsNull_ThrowsAgeViolationException() {
     // Given
     Pageable pageable = Pageable.unpaged();
     MovieFiltersRequest movieFiltersRequest1 = new MovieFiltersRequest();
@@ -536,5 +581,91 @@ public class MovieServiceImplTest {
         () -> assertThrows(AgeViolationException.class,
             () -> movieService.getAllMoviesByFiltersForClient(pageable, movieFiltersRequest2))
     );
+  }
+
+  @Test
+  void getAllMoviesByFiltersForAdmin_Success() {
+    // Given
+    Pageable pageable = Pageable.unpaged();
+    MovieFiltersRequest movieFiltersRequest = new MovieFiltersRequest();
+    movieFiltersRequest.setGenreIds(List.of(1L, 2L));
+    Genre genre1 = new Genre();
+    genre1.setId(1L);
+    genre1.setName("Action");
+    Genre genre2 = new Genre();
+    genre2.setId(2L);
+    genre2.setName("Adventure");
+
+    List<Genre> genres = new ArrayList<>(List.of(genre1, genre2));
+
+    Page<MoviePageDetails> moviePage = new PageImpl<>(List.of(MoviePageDetails.builder()
+        .fileId(1L)
+        .build()));
+    Page<MoviePageDetailsResponse> expectedMoviePage = new PageImpl<>(
+        List.of(MoviePageDetailsResponse.builder().build()));
+
+    MovieFilters movieFilters = new MovieFilters();
+    movieFilters.setGenres(genres);
+
+    MovieFileResponseUrl previewResponseUrl = new MovieFileResponseUrl("previewAccessUrl");
+
+    when(genreRepository.findAllById(movieFiltersRequest.getGenreIds())).thenReturn(genres);
+    when(movieMapper.toMovieFilters(movieFiltersRequest, genres)).thenReturn(movieFilters);
+    when(movieRepository.findAllByFilters(any(), any())).thenReturn(moviePage);
+    when(movieMapper.toMoviePageDetailsAdminResponse(any(), anyString())).thenReturn(
+        new MoviePageDetailsAdminResponse());
+    when(mediaServiceClient.getFile(1L)).thenReturn(previewResponseUrl);
+
+    // When
+    Page<MoviePageDetailsAdminResponse> result = movieService.getAllMoviesByFiltersForAdmin(
+        pageable,
+        movieFiltersRequest);
+
+    // Then
+    assertEquals(expectedMoviePage.getContent().size(), result.getContent().size());
+    verify(movieRepository, times(1)).findAllByFilters(any(), any());
+    verify(movieMapper, times(moviePage.getContent().size()))
+        .toMoviePageDetailsAdminResponse(any(), anyString());
+  }
+
+  @Test
+  void changeMovieStatus_Success() {
+    // Given
+    Long movieId = 1L;
+    boolean movieStatus = true;
+    Movie movie = new Movie();
+    movie.setId(movieId);
+    movie.setIsPublish(!movieStatus);
+    MovieBriefInfo movieBriefInfo = new MovieBriefInfo();
+    movieBriefInfo.setId(movieId);
+    movieBriefInfo.setIsPublish(movieStatus);
+
+    when(movieRepository.findById(movieId)).thenReturn(Optional.of(movie));
+    when(movieRepository.save(any(Movie.class))).thenReturn(movie);
+    when(movieMapper.toMovieBriefInfo(movie)).thenReturn(movieBriefInfo);
+
+    // When
+    MovieBriefInfo result = movieService.changeMovieStatus(movieId, movieStatus);
+
+    // Then
+    assertTrue(movie.getIsPublish());
+    assertEquals(movieStatus, result.getIsPublish());
+    verify(movieRepository, times(1)).save(movie);
+    verify(movieMapper, times(1)).toMovieBriefInfo(movie);
+  }
+
+  @Test
+  void changeMovieStatus_MovieNotFound_ThrowsEntityNotFoundException() {
+    // Given
+    Long movieId = 1L;
+    boolean movieStatus = true;
+
+    when(movieRepository.findById(movieId)).thenReturn(Optional.empty());
+
+    // When & Then
+    assertThrows(EntityNotFoundException.class,
+        () -> movieService.changeMovieStatus(movieId, movieStatus));
+    verify(movieRepository, never()).save(any(Movie.class));
+    verify(movieMapper, never()).toMovieBriefInfo(any(Movie.class));
   }
 }
