@@ -6,69 +6,9 @@ eureka:
 spring:
   config:
     import: file:.env[.properties]
-
-  datasource:
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USER}
-    password: ${DATABASE_PASSWORD}
-
   jpa:
-    hibernate:
-      ddl-auto: validate
-    properties:
-      hibernate:
-        default_schema: cinema_service
     show-sql: true
 
-  flyway:
-    schemas: cinema_service
-    locations: db/migration/base
-
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: ${JWK_SET_URI}
-
-  servlet:
-    multipart:
-      enabled: true
-      file-size-threshold: 10KB
-      max-file-size: 20MB
-      max-request-size: 50MB
-
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: ${RABBITMQ_USERNAME}
-    password: ${RABBITMQ_PASSWORD}
-
-jwt:
-  auth:
-    converter:
-      principle-attribute: ${PRINCIPLE_ATTRIBUTE}
-
-media-service:
-  url: ${MEDIA_SERVICE_URL}
-
-payment-service:
-  url: ${PAYMENT_SERVICE_URL}
-
-#minutes
-movies:
-  delay-between-showtime: 5
-
-#minutes
-orders:
-  reservation-time: 1
-
-rabbitmq:
-  order:
-    reservation:
-      exchange: order.reservation.exchange
-      routing-key: order.reservation.routing
-      queue: order-reservation-queue
-    payment:
-      exchange: payment.confirm.exchange
-      routing-key: payment.confirm
-      queue: order-payment-confirm-queue
+logging:
+  level:
+    com.project.cinemaservice: debug

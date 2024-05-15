@@ -26,6 +26,7 @@ import com.project.cinemaservice.domain.mapper.OrderMapper;
 import com.project.cinemaservice.messaging.OrderReservationEventPublisher;
 import com.project.cinemaservice.persistence.enums.OrderStatus;
 import com.project.cinemaservice.persistence.model.AuditEntity;
+import com.project.cinemaservice.persistence.model.CinemaRoom;
 import com.project.cinemaservice.persistence.model.Order;
 import com.project.cinemaservice.persistence.model.OrderPaymentDetails;
 import com.project.cinemaservice.persistence.model.RoomSeat;
@@ -55,9 +56,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
@@ -105,8 +106,23 @@ public class OrderServiceImplTest {
   @Mock
   private PaymentServiceClient paymentServiceClient;
 
-  @InjectMocks
   private OrderServiceImpl orderService;
+
+  @BeforeEach
+  public void openMocks() {
+    orderService = new OrderServiceImpl(orderRepository,
+        orderTicketRepository,
+        roomSeatRepository,
+        showtimeRepository,
+        ticketRepository,
+        orderPaymentDetailsRepository,
+        orderStatusTransitionsMap,
+        orderReservationEventPublisher,
+        orderMapper,
+        mediaServiceClient,
+        paymentServiceClient,
+        5L);
+  }
 
   @Test
   void createOrder_Success() {
@@ -116,26 +132,31 @@ public class OrderServiceImplTest {
     List<Long> selectedRoomSeatsIds = new ArrayList<>();
     selectedRoomSeatsIds.add(1L);
     orderCreateRequest.setSelectedRoomSeatsIds(selectedRoomSeatsIds);
+
+    CinemaRoom cinemaRoom = CinemaRoom.builder()
+        .id(1L)
+        .build();
+
     Showtime showtime = new Showtime();
     showtime.setStartDate(LocalDateTime.now().plusHours(6));
     showtime.setId(1L);
+    showtime.setCinemaRoom(cinemaRoom);
 
     Order order = new Order();
     order.setId(1L);
 
     Ticket ticket = Ticket.builder()
         .showtime(showtime)
-        .roomSeat(RoomSeat.builder()
-            .seatNumber(1L)
-            .build())
+        .roomSeat(RoomSeat.builder().seatNumber(1L).build())
         .build();
 
     when(orderRepository.save(any(Order.class))).thenReturn(order);
     when(showtimeRepository.findById(1L)).thenReturn(Optional.of(showtime));
-    when(roomSeatRepository.findById(1L)).thenReturn(Optional.of(new RoomSeat()));
+    when(roomSeatRepository.findByIdAndCinemaRoomId(1L, 1L)).thenReturn(
+        Optional.of(new RoomSeat()));
     when(ticketRepository.save(any())).thenReturn(ticket);
-    when(orderMapper.toOrderClientResponse(order, showtime.getId(), selectedRoomSeatsIds))
-        .thenReturn(new OrderClientResponse());
+    when(orderMapper.toOrderClientResponse(order, showtime.getId(),
+        selectedRoomSeatsIds)).thenReturn(new OrderClientResponse());
 
     // When
     OrderClientResponse response = orderService.createOrder(orderCreateRequest);
@@ -169,10 +190,16 @@ public class OrderServiceImplTest {
     selectedRoomSeatsIds.add(2L);
     orderCreateRequest.setSelectedRoomSeatsIds(selectedRoomSeatsIds);
     Showtime showtime = new Showtime();
+    CinemaRoom cinemaRoom = CinemaRoom.builder()
+        .id(1L)
+        .build();
+    showtime.setCinemaRoom(cinemaRoom);
     showtime.setStartDate(LocalDateTime.now().plusHours(6));
     when(showtimeRepository.findById(1L)).thenReturn(Optional.of(showtime));
-    when(roomSeatRepository.findById(1L)).thenReturn(Optional.of(new RoomSeat()));
-    when(roomSeatRepository.findById(2L)).thenReturn(Optional.empty());
+    when(roomSeatRepository.findByIdAndCinemaRoomId(1L, 1L)).thenReturn(
+        Optional.of(new RoomSeat()));
+    when(roomSeatRepository.findByIdAndCinemaRoomId(2L, 1L))
+        .thenReturn(Optional.empty());
 
     // When & Then
     assertThrows(EntityNotFoundException.class, () -> orderService.createOrder(orderCreateRequest));
@@ -492,7 +519,8 @@ public class OrderServiceImplTest {
     when(orderRepository.findAllOrders(pageable, orderFilterRequest)).thenReturn(expectedAdminInfo);
 
     // When
-    OrderBriefInfoAdmin resultAdminInfo = orderService.getAllOrdersByFilter(pageable, orderFilterRequest);
+    OrderBriefInfoAdmin resultAdminInfo = orderService.getAllOrdersByFilter(pageable,
+        orderFilterRequest);
 
     // Then
     assertEquals(expectedAdminInfo, resultAdminInfo);

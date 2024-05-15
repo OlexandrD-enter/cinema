@@ -7,18 +7,7 @@ spring:
   config:
     import: file:.env[.properties]
 
-keycloak:
-  admin-username: ${KEYCLOAK_ADMIN_USERNAME}
-  admin-password: ${KEYCLOAK_ADMIN_PASSWORD}
-  admin-realm: ${KEYCLOAK_ADMIN_REALM}
-  admin-resource: ${KEYCLOAK_ADMIN_RESOURCE}
-  realm: ${KEYCLOAK_REALM}
-  resource: ${KEYCLOAK_RESOURCE}
-  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL}
-  credentials:
-    secret: ${KEYCLOAK_SECRET}
-  base-url: ${KEYCLOAK_BASE_URL}
+logging:
+  level:
+    com.project.authservice: debug
 
-jwt:
-  auth:
-    converter:

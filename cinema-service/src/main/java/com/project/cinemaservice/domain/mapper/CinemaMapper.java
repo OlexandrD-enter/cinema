@@ -20,7 +20,9 @@ public interface CinemaMapper {
   @Mapping(source = "auditEntity.updatedAt", target = "updatedAt")
   @Mapping(source = "auditEntity.createdBy", target = "createdBy")
   @Mapping(source = "auditEntity.modifiedBy", target = "modifiedBy")
-  @Mapping(target = "cinemaRooms", expression = "java(mapCinemaRooms(cinema.getCinemaRooms()))")
+  @Mapping(target = "cinemaRooms", expression = "java(cinema.getCinemaRooms() != null "
+      + "? mapCinemaRooms(cinema.getCinemaRooms()) "
+      + ": null)")
   CinemaAdminResponse toCinemaAdminResponse(Cinema cinema);
 
   /**

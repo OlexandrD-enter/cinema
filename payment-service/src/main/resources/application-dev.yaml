@@ -6,33 +6,3 @@ eureka:
 spring:
   config:
     import: file:.env[.properties]
-
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: ${JWK_SET_URI}
-
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: ${RABBITMQ_USERNAME}
-    password: ${RABBITMQ_PASSWORD}
-
-jwt:
-  auth:
-    converter:
-      principle-attribute: ${PRINCIPLE_ATTRIBUTE}
-
-stripe:
-  secret-key: ${STRIPE_SECRET_KEY}
-  webhook-secret: ${STRIPE_WEBHOOK_SECRET}
-  payment:
-    configuration: ${STRIPE_PAYMENT_CONFIG}
-    session-expiration: ${STRIPE_SESSION_EXPIRATION}
-    success-url: ${STRIPE_SUCCESS_URL}
-    failure-url: ${STRIPE_FAILURE_URL}
-
-
-cinema-service:
-  url: ${CINEMA_SERVICE_URL}

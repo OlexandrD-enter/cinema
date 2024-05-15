@@ -52,9 +52,7 @@ public class MovieEditRequest {
       message = "Not valid director, only letters, length [2,50]")
   private String director;
   @Schema(example = "2024-04-30T15:25:00")
-  @NotNull(message = "Not valid realiseDate")
-  @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
-      message = "Not valid realiseDate, YYYY-MM-DDTHH:MM:SS")
+  @NotNull(message = "Not valid realiseDate, YYYY-MM-DDTHH:MM:SS")
   private LocalDateTime realiseDate;
   @NotNull(message = "Not valid duration")
   private Duration duration;

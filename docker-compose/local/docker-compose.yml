@@ -1,0 +1,61 @@
+version: '3.9'
+
+name: cinema-local
+
+services:
+  postgres:
+    container_name: local-postgres
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: always
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:22.0.5
+    container_name: local-keycloak
+    volumes:
+      - ../keycloak:/opt/keycloak/data/import
+    command:
+      - "start-dev --import-realm"
+    environment:
+      DB_VENDOR: ${DB_VENDOR}
+      DB_ADDR: ${DB_ADDR}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USER: ${DATABASE_USER}
+      DB_PASSWORD: ${DATABASE_PASSWORD}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USERNAME}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+    ports:
+      - "8082:8080"
+    depends_on:
+      postgres:
+        condition: service_started
+
+  stripe-cli:
+    image: stripe/stripe-cli
+    container_name: local-stripe_cli
+    environment:
+      STRIPE_API_KEY: ${STRIPE_SECRET_KEY}
+    command: "listen --forward-to host.docker.internal:8080/payments/stripe/events"
+
+  rabbitmq:
+    container_name: local-delayed-rabbitmq
+    build:
+      dockerfile: ../rabbitmq/Dockerfile
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+volumes:
+  postgres-data:
+    name: postgres-data

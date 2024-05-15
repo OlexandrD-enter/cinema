@@ -25,7 +25,9 @@ public interface CinemaRoomMapper {
   @Mapping(source = "auditEntity.createdBy", target = "createdBy")
   @Mapping(source = "auditEntity.modifiedBy", target = "modifiedBy")
   @Mapping(source = "cinema.id", target = "cinemaId")
-  @Mapping(target = "roomSeats", expression = "java(mapRoomSeats(cinemaRoom.getRoomSeats()))")
+  @Mapping(target = "roomSeats", expression = "java(cinemaRoom.getRoomSeats() != null "
+      + "? mapRoomSeats(cinemaRoom.getRoomSeats()) "
+      + ": null)")
   CinemaRoomAdminResponse toCinemaRoomAdminResponse(CinemaRoom cinemaRoom);
 
   /**

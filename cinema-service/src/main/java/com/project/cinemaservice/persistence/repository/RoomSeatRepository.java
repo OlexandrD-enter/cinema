@@ -12,4 +12,6 @@ import org.springframework.stereotype.Repository;
 public interface RoomSeatRepository extends JpaRepository<RoomSeat, Long> {
 
   Optional<RoomSeat> findBySeatNumberAndCinemaRoomId(Long seatNumber, Long roomId);
+
+  Optional<RoomSeat> findByIdAndCinemaRoomId(Long roomSeatId, Long cinemaRoomId);
 }

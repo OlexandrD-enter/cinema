@@ -1,0 +1,258 @@
+version: '3.9'
+
+name: cinema
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: always
+
+  discovery-service:
+    container_name: discovery-service
+    build: ../../discovery-service/
+    restart: on-failure
+    ports:
+      - "8761:8761"
+    depends_on:
+      postgres:
+        condition: service_started
+      keycloak:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: "prod"
+
+  gateway-service:
+    container_name: gateway-service
+    build: ../../gateway-service/
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      discovery-service:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: "prod"
+
+  auth-service:
+    container_name: authentication-service
+    build: ../../auth-service/
+    restart: on-failure
+    ports:
+      - "8090:8090"
+    depends_on:
+      postgres:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      discovery-service:
+        condition: service_started
+    environment:
+      JWK_SET_URI: ${JWK_SET_URI}
+      PRINCIPLE_ATTRIBUTE: ${PRINCIPLE_ATTRIBUTE}
+      KEYCLOAK_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KEYCLOAK_ADMIN_REALM: ${KEYCLOAK_ADMIN_REALM}
+      KEYCLOAK_ADMIN_RESOURCE: ${KEYCLOAK_ADMIN_RESOURCE}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM}
+      KEYCLOAK_RESOURCE: ${KEYCLOAK_RESOURCE}
+      KEYCLOAK_AUTH_SERVER_URL: ${KEYCLOAK_AUTH_SERVER_URL}
+      KEYCLOAK_SECRET: ${KEYCLOAK_SECRET}
+      KEYCLOAK_BASE_URL: ${KEYCLOAK_BASE_URL}
+      SPRING_PROFILES_ACTIVE: "prod"
+
+  cinema-service:
+    container_name: cinema-service
+    build: ../../cinema-service/
+    restart: on-failure
+    ports:
+      - "8092:8092"
+    depends_on:
+      postgres:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      discovery-service:
+        condition: service_started
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      JWK_SET_URI: ${JWK_SET_URI}
+      PRINCIPLE_ATTRIBUTE: ${PRINCIPLE_ATTRIBUTE}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      MEDIA_SERVICE_URL: ${MEDIA_SERVICE_URL}
+      PAYMENT_SERVICE_URL: ${PAYMENT_SERVICE_URL}
+      DELAY_BETWEEN_SHOWTIME: ${DELAY_BETWEEN_SHOWTIME}
+      RESERVATION_TIME: ${RESERVATION_TIME}
+      LEFT_TIME_FOR_CANCEL: ${LEFT_TIME_FOR_CANCEL}
+      SPRING_PROFILES_ACTIVE: "prod"
+
+  media-service:
+    container_name: media-service
+    build: ../../media-service/
+    restart: on-failure
+    ports:
+      - "8093:8093"
+    depends_on:
+      postgres:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      discovery-service:
+        condition: service_started
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      JWK_SET_URI: ${JWK_SET_URI}
+      PRINCIPLE_ATTRIBUTE: ${PRINCIPLE_ATTRIBUTE}
+      AWS_S3_ACCESS_KEY: ${AWS_S3_ACCESS_KEY}
+      AWS_S3_SECRET_KEY: ${AWS_S3_SECRET_KEY}
+      AWS_S3_REGION: ${AWS_S3_REGION}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET}
+      AWS_S3_LINK_EXPIRATION: ${AWS_S3_LINK_EXPIRATION}
+      SPRING_PROFILES_ACTIVE: "prod"
+
+  notification-service:
+    container_name: notification-service
+    build: ../../notification-service/
+    restart: on-failure
+    ports:
+      - "8094:8094"
+    depends_on:
+      postgres:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      discovery-service:
+        condition: service_started
+    environment:
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      EMAIL_USERNAME: ${EMAIL_USERNAME}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      EMAIL_SOURCE_ADDRESS: ${EMAIL_SOURCE_ADDRESS}
+      EMAIL_VERIFICATION_URL: ${EMAIL_VERIFICATION_URL}
+      SPRING_PROFILES_ACTIVE: "prod"
+
+  payment-service:
+    container_name: payment-service
+    build: ../../payment-service/
+    restart: on-failure
+    ports:
+      - "8095:8095"
+    depends_on:
+      postgres:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      discovery-service:
+        condition: service_started
+    environment:
+      JWK_SET_URI: ${JWK_SET_URI}
+      PRINCIPLE_ATTRIBUTE: ${PRINCIPLE_ATTRIBUTE}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      STRIPE_PAYMENT_CONFIG: ${STRIPE_PAYMENT_CONFIG}
+      STRIPE_SESSION_EXPIRATION: ${STRIPE_SESSION_EXPIRATION}
+      STRIPE_SUCCESS_URL: ${STRIPE_SUCCESS_URL}
+      STRIPE_FAILURE_URL: ${STRIPE_FAILURE_URL}
+      CINEMA_SERVICE_URL: ${CINEMA_SERVICE_URL}
+      SPRING_PROFILES_ACTIVE: "prod"
+
+  user-service:
+    container_name: user-service
+    build: ../../user-service/
+    restart: on-failure
+    ports:
+      - "8091:8091"
+    depends_on:
+      postgres:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      discovery-service:
+        condition: service_started
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      JWK_SET_URI: ${JWK_SET_URI}
+      PRINCIPLE_ATTRIBUTE: ${PRINCIPLE_ATTRIBUTE}
+      KEYCLOAK_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KEYCLOAK_ADMIN_REALM: ${KEYCLOAK_ADMIN_REALM}
+      KEYCLOAK_ADMIN_RESOURCE: ${KEYCLOAK_ADMIN_RESOURCE}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM}
+      KEYCLOAK_RESOURCE: ${KEYCLOAK_RESOURCE}
+      KEYCLOAK_AUTH_SERVER_URL: ${KEYCLOAK_AUTH_SERVER_URL}
+      KEYCLOAK_SECRET: ${KEYCLOAK_SECRET}
+      KEYCLOAK_BASE_URL: ${KEYCLOAK_BASE_URL}
+      RETRY_INTERVAL_TIME: ${RETRY_INTERVAL_TIME}
+      SPRING_PROFILES_ACTIVE: "prod"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:22.0.5
+    container_name: keycloak
+    volumes:
+      - ../keycloak:/opt/keycloak/data/import
+    command:
+      - "start-dev --import-realm"
+    environment:
+      DB_VENDOR: ${DB_VENDOR}
+      DB_ADDR: ${DB_ADDR}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USER: ${DATABASE_USER}
+      DB_PASSWORD: ${DATABASE_PASSWORD}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USERNAME}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+    ports:
+      - "8082:8080"
+    depends_on:
+      postgres:
+        condition: service_started
+
+  stripe-cli:
+    image: stripe/stripe-cli
+    container_name: stripe_cli
+    environment:
+      STRIPE_API_KEY: ${STRIPE_SECRET_KEY}
+    command: "listen --forward-to gateway-service:8080/payments/stripe/events"
+
+  rabbitmq:
+    container_name: delayed-rabbitmq
+    build:
+      dockerfile: ../rabbitmq/Dockerfile
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+volumes:
+  postgres-data:
+    name: postgres-data

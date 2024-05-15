@@ -7,37 +7,9 @@ spring:
   config:
     import: file:.env[.properties]
 
-  datasource:
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USER}
-    password: ${DATABASE_PASSWORD}
-
   jpa:
-    hibernate:
-      ddl-auto: validate
-    properties:
-      hibernate:
-        default_schema: media_service
     show-sql: true
 
-  flyway:
-    schemas: media_service
-    locations: db/migration/base
-
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: ${JWK_SET_URI}
-
-  servlet:
-    multipart:
-      enabled: true
-      file-size-threshold: 10KB
-      max-file-size: 20MB
-      max-request-size: 50MB
-
-jwt:
-  auth:
-    converter:
-      principle-attribute: ${PRINCIPLE_ATTRIBUTE}
+logging:
+  level:
+    com.project.mediaservice: debug

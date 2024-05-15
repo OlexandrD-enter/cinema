@@ -43,8 +43,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -58,7 +58,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
   private final OrderRepository orderRepository;
@@ -72,6 +71,54 @@ public class OrderServiceImpl implements OrderService {
   private final OrderMapper orderMapper;
   private final MediaServiceClient mediaServiceClient;
   private final PaymentServiceClient paymentServiceClient;
+  private final long leftTimeBeforeSuccessCancelOrOrderInMinutes;
+
+  /**
+   * Constructs an OrderServiceImpl with required repositories, mappers, clients, and configuration
+   * parameters.
+   *
+   * @param orderRepository                             Repository for managing orders.
+   * @param orderTicketRepository                       Repository for managing order tickets.
+   * @param roomSeatRepository                          Repository for managing room seats.
+   * @param showtimeRepository                          Repository for managing showtimes.
+   * @param ticketRepository                            Repository for managing tickets.
+   * @param orderPaymentDetailsRepository               Repository for managing order payment
+   *                                                    details.
+   * @param orderStatusTransitionsMap                   Map defining valid order status
+   *                                                    transitions.
+   * @param orderReservationEventPublisher              Event publisher for order reservation
+   *                                                    events.
+   * @param orderMapper                                 Mapper for converting order entities.
+   * @param mediaServiceClient                          Client for interacting with media services.
+   * @param paymentServiceClient                        Client for interacting with payment
+   *                                                    services.
+   * @param leftTimeBeforeSuccessCancelOrOrderInMinutes Time limit for successful order cancellation
+   *                                                    or completion.
+   */
+  public OrderServiceImpl(OrderRepository orderRepository,
+      OrderTicketRepository orderTicketRepository,
+      RoomSeatRepository roomSeatRepository,
+      ShowtimeRepository showtimeRepository,
+      TicketRepository ticketRepository,
+      OrderPaymentDetailsRepository orderPaymentDetailsRepository,
+      Map<OrderStatus, Set<OrderStatus>> orderStatusTransitionsMap,
+      OrderReservationEventPublisher orderReservationEventPublisher,
+      OrderMapper orderMapper, MediaServiceClient mediaServiceClient,
+      PaymentServiceClient paymentServiceClient,
+      @Value("${orders.left-time-for-cancel}") long leftTimeBeforeSuccessCancelOrOrderInMinutes) {
+    this.orderRepository = orderRepository;
+    this.orderTicketRepository = orderTicketRepository;
+    this.roomSeatRepository = roomSeatRepository;
+    this.showtimeRepository = showtimeRepository;
+    this.ticketRepository = ticketRepository;
+    this.orderPaymentDetailsRepository = orderPaymentDetailsRepository;
+    this.orderStatusTransitionsMap = orderStatusTransitionsMap;
+    this.orderReservationEventPublisher = orderReservationEventPublisher;
+    this.orderMapper = orderMapper;
+    this.mediaServiceClient = mediaServiceClient;
+    this.paymentServiceClient = paymentServiceClient;
+    this.leftTimeBeforeSuccessCancelOrOrderInMinutes = leftTimeBeforeSuccessCancelOrOrderInMinutes;
+  }
 
   @Transactional
   @Override
@@ -97,11 +144,14 @@ public class OrderServiceImpl implements OrderService {
           String.format("Showtime with id=%d already passed", showTimeId));
     }
 
+    Long roomIdFromShowtime = showtime.getCinemaRoom().getId();
+
     List<OrderTicket> orderTickets = orderCreateRequest.getSelectedRoomSeatsIds().stream()
-        .map(roomSeatRequest -> {
-          RoomSeat roomSeat = roomSeatRepository.findById(roomSeatRequest).orElseThrow(
-              () -> new EntityNotFoundException(
-                  String.format("RoomSeat with id=%d not found", roomSeatRequest)));
+        .map(roomSeatId -> {
+          RoomSeat roomSeat = roomSeatRepository.findByIdAndCinemaRoomId(roomSeatId,
+              roomIdFromShowtime).orElseThrow(() -> new EntityNotFoundException(
+                  String.format("RoomSeat with id=%d not found in CinemaRoom id=%d", roomSeatId,
+                      showtime.getCinemaRoom().getId())));
 
           Ticket ticket = ticketRepository.save(Ticket.builder()
               .roomSeat(roomSeat)
@@ -280,7 +330,8 @@ public class OrderServiceImpl implements OrderService {
   private void checkIfCancellationTimeIsCorrect(Order order) {
     LocalDateTime startDateOfShowtimeByOrderId =
         showtimeRepository.findStartDateOfShowtimeByOrderId(order.getId());
-    if (LocalDateTime.now().plusHours(1).isAfter(startDateOfShowtimeByOrderId)) {
+    if (LocalDateTime.now().plusMinutes(leftTimeBeforeSuccessCancelOrOrderInMinutes)
+        .isAfter(startDateOfShowtimeByOrderId)) {
       throw new CancellationTimeIsUpException(
           String.format("It`s to late to cancel order with id=%d", order.getId()));
     }

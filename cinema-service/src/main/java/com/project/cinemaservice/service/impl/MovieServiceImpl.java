@@ -365,7 +365,7 @@ public class MovieServiceImpl implements MovieService {
     List<Genre> genres = new ArrayList<>();
     List<Long> genreIds = movieFiltersRequest.getGenreIds();
 
-    if (!genreIds.isEmpty()) {
+    if (genreIds != null && !genreIds.isEmpty()) {
       genres = genreRepository.findAllById(genreIds);
 
       if (genres.size() != genreIds.size()) {
