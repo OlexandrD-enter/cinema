@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="eng">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>Order paid tickets</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    .container {
+      width: 800px;
+      background-color: white;
+      text-align: center;
+      padding: 30px;
+      font-size: 14px;
+      color: #121212;
+      box-sizing: border-box;
+      margin: 0 auto;
+    }
+
+    section {
+      padding: 30px 0;
+      border-bottom: 1px solid #E3E3EB;
+    }
+
+    section:last-of-type {
+      border-bottom: none;
+    }
+
+    section > p {
+      text-align: left;
+    }
+
+    section > p:last-of-type {
+      margin-bottom: 0;
+    }
+
+    section > p:first-of-type {
+      margin-top: 0;
+    }
+
+    table {
+      width: 100%;
+    }
+
+    td {
+      text-align: left;
+    }
+
+    td:last-of-type {
+      text-align: right;
+    }
+
+    th {
+      padding-bottom: 30px;
+      font-size: 16px;
+      font-weight: 500;
+      text-align: left;
+      margin-bottom: 30px;
+    }
+
+    th:last-of-type {
+      text-align: center;
+    }
+
+    .image {
+      width: 300px;
+      height: 400px;
+      margin-right: 8px;
+    }
+
+    .end > P {
+      text-align: left;
+    }
+
+    .end > P:last-of-type,
+    :nth-last-of-type(2) {
+      margin: 0;
+    }
+
+    .container-preview {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .left {
+      flex: 1;
+      padding: 20px;
+    }
+
+    .right {
+      flex: 2;
+      padding: 20px;
+    }
+
+    .text-values {
+      list-style: none;
+      padding: 0;
+      text-align: left;
+    }
+
+    .text-values li {
+      margin-bottom: 30px;
+    }
+
+  </style>
+</head>
+<body>
+<div class="container">
+  <section class="container-preview">
+    <div class="left">
+      <img class="image" th:src="@{${image}}" alt="Cinema"/>
+    </div>
+    <div class="right">
+      <ul class="text-values">
+        <li th:text="'Order id #: ' + ${order.orderId}"></li>
+        <li th:text="'Movie name: ' + ${order.movieName}"></li>
+        <li th:text="'Age restrictions: ' + ${order.ageLimit} + '+'"></li>
+        <li th:text="'Start date: ' +${startDate}"></li>
+        <li th:text="'Room: ' + ${order.cinemaRoomName}"></li>
+        <li th:text="'City: ' + ${order.city}"></li>
+        <li th:text="'Address: ' + ${order.streetAddress}"></li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <table class="table">
+      <tbody>
+      <tr>
+        <th>Room</th>
+        <th>Room seat</th>
+        <th>Price</th>
+      </tr>
+
+      <tr th:each="ticket : ${order.tickets}">
+        <td th:text="${ticket.cinemaRoomName}"></td>
+        <td th:text="${ticket.roomSeatNumber}"></td>
+        <td th:text="${ticket.price}"></td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="end">
+    <p>Thanks for choosing our services!</p>
+    <p>Regards,</p>
+    <p><b>Cinema service</b></p>
+  </div>
+</div>
+</body>
+</html>

@@ -56,7 +56,7 @@ rabbitmq:
   user:
     email-verification:
       exchange: user.email.exchange
-      routing-key: user.email-verification
+      routing-key: user.email.verification
 
 #minutes
 email:

@@ -12,8 +12,8 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 /**
- * Represents construction of an email message for user verification. Extends the
- * {@link EmailMessage} class.
+ * Represents construction of an email message for user verification. Extends the EmailMessage
+ * class.
  */
 @Component
 public class VerificationEmailMessage extends EmailMessage {

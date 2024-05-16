@@ -97,9 +97,11 @@ public class WebClientConfig {
   }
 
   private String extractJwtTokenFromContext() {
-    Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    if (principal instanceof Jwt jwt) {
-      return jwt.getTokenValue();
+    if (SecurityContextHolder.getContext().getAuthentication() != null) {
+      Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+      if (principal instanceof Jwt jwt) {
+        return jwt.getTokenValue();
+      }
     }
     return null;
   }

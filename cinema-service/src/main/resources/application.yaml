@@ -63,12 +63,16 @@ rabbitmq:
   order:
     reservation:
       exchange: order.reservation.exchange
-      routing-key: order.reservation.routing
+      routing-key: order.reservation
       queue: order-reservation-queue
     payment:
-      exchange: payment.confirm.exchange
-      routing-key: payment.confirm
+      exchange: order.exchange
+      routing-key: order.payment.confirm
       queue: order-payment-confirm-queue
+  user:
+    paid-tickets:
+      exchange: user.email.exchange
+      routing-key: user.email.ordered.tickets
 
 server:
   port: 8092

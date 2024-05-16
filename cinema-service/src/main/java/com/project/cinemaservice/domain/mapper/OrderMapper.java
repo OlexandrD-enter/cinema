@@ -23,4 +23,5 @@ public interface OrderMapper {
       String moviePreviewUrl);
 
   OrderStatusDetails toOrderStatusDetails(Order order);
+
 }

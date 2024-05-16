@@ -8,7 +8,8 @@ import lombok.Getter;
 @Getter
 public enum EmailType {
 
-  VERIFICATION_EMAIL("user-verification-email.html");
+  VERIFICATION_EMAIL("user-verification-email.html"),
+  ORDERED_TICKETS_EMAIL("ordered-tickets.html");
 
   private final String fileName;
 

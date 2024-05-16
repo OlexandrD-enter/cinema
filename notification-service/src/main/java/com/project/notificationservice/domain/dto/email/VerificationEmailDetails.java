@@ -3,7 +3,7 @@ package com.project.notificationservice.domain.dto.email;
 import lombok.Getter;
 
 /**
- * A specific extension of {@link EmailDetails} representing details for a verification email.
+ * A specific extension of EmailDetails representing details for a verification email.
  */
 @Getter
 public class VerificationEmailDetails extends EmailDetails {

@@ -24,11 +24,18 @@ import com.project.cinemaservice.domain.dto.order.OrderStatusDetails;
 import com.project.cinemaservice.domain.dto.roomseat.RoomSeatBriefInfo;
 import com.project.cinemaservice.domain.mapper.OrderMapper;
 import com.project.cinemaservice.messaging.OrderReservationEventPublisher;
+import com.project.cinemaservice.messaging.OrderedTicketsEventPublisher;
+import com.project.cinemaservice.messaging.event.OrderedTicketsEvent;
+import com.project.cinemaservice.persistence.enums.MovieFileType;
 import com.project.cinemaservice.persistence.enums.OrderStatus;
 import com.project.cinemaservice.persistence.model.AuditEntity;
+import com.project.cinemaservice.persistence.model.Cinema;
 import com.project.cinemaservice.persistence.model.CinemaRoom;
+import com.project.cinemaservice.persistence.model.Movie;
+import com.project.cinemaservice.persistence.model.MovieFile;
 import com.project.cinemaservice.persistence.model.Order;
 import com.project.cinemaservice.persistence.model.OrderPaymentDetails;
+import com.project.cinemaservice.persistence.model.OrderTicket;
 import com.project.cinemaservice.persistence.model.RoomSeat;
 import com.project.cinemaservice.persistence.model.Showtime;
 import com.project.cinemaservice.persistence.model.Ticket;
@@ -98,6 +105,9 @@ public class OrderServiceImplTest {
   private OrderReservationEventPublisher orderReservationEventPublisher;
 
   @Mock
+  private OrderedTicketsEventPublisher orderedTicketsEventPublisher;
+
+  @Mock
   private OrderMapper orderMapper;
 
   @Mock
@@ -118,6 +128,7 @@ public class OrderServiceImplTest {
         orderPaymentDetailsRepository,
         orderStatusTransitionsMap,
         orderReservationEventPublisher,
+        orderedTicketsEventPublisher,
         orderMapper,
         mediaServiceClient,
         paymentServiceClient,
@@ -316,7 +327,32 @@ public class OrderServiceImplTest {
   void confirmOrderPayment_Success() {
     // Given
     Order order = new Order();
+    Ticket ticket = new Ticket();
+    Showtime showtime = new Showtime();
+    CinemaRoom cinemaRoom = new CinemaRoom();
+    RoomSeat roomSeat = new RoomSeat();
+    Cinema cinema = new Cinema();
+    Movie movie = new Movie();
+    MovieFile movieFile = new MovieFile();
+
+    movieFile.setMovieFileType(MovieFileType.MOVIE_PREVIEW);
+    movieFile.setFileId(1L);
+    movie.setMovieFiles(List.of(movieFile));
+    cinemaRoom.setCinema(cinema);
+    cinemaRoom.setName("Room 1");
+    showtime.setCinemaRoom(cinemaRoom);
+    showtime.setMovie(movie);
+    ticket.setShowtime(showtime);
+    ticket.setRoomSeat(roomSeat);
+    roomSeat.setCinemaRoom(cinemaRoom);
+    roomSeat.setSeatNumber(11L);
+    OrderTicket orderTicket = new OrderTicket();
+    orderTicket.setOrder(order);
+    orderTicket.setTicket(ticket);
+    order.setOrderTickets(List.of(orderTicket));
+
     when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+    when(mediaServiceClient.getFile(1L)).thenReturn(new MovieFileResponseUrl("accessUrl"));
     when(orderMapper.toOrderStatusDetails(any())).thenReturn(new OrderStatusDetails());
 
     // When
@@ -325,6 +361,8 @@ public class OrderServiceImplTest {
     // Then
     assertNotNull(result);
     assertEquals(OrderStatus.PAID, order.getOrderStatus());
+    verify(orderedTicketsEventPublisher, times(1)).sendOrderedTicketsEvent(
+        any(OrderedTicketsEvent.class));
   }
 
   @Test

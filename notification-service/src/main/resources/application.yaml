@@ -34,7 +34,11 @@ rabbitmq:
     email-verification:
       exchange: user.email.exchange
       queue: email-verification-queue
-      routing-key: user.email-verification
+      routing-key: user.email.verification
+    paid-tickets:
+      exchange: user.email.exchange
+      queue: email-ordered-tickets-queue
+      routing-key: user.email.ordered.tickets
 
 email:
   source-address: ${EMAIL_SOURCE_ADDRESS}

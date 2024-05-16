@@ -40,8 +40,8 @@ server:
 rabbitmq:
   order:
    payment:
-      exchange: payment.confirm.exchange
-      routing-key: payment.confirm
+      exchange: order.exchange
+      routing-key: order.payment.confirm
 
 springdoc:
   swagger-ui:

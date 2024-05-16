@@ -2,6 +2,7 @@ package com.project.notificationservice.config.email;
 
 import com.project.notificationservice.domain.dto.email.EmailType;
 import com.project.notificationservice.service.email.EmailMessage;
+import com.project.notificationservice.service.email.OrderedTicketsEmailMessage;
 import com.project.notificationservice.service.email.VerificationEmailMessage;
 import java.util.Map;
 import org.springframework.context.annotation.Bean;
@@ -21,10 +22,12 @@ public class EmailConfiguration {
    */
   @Bean
   public Map<EmailType, EmailMessage> emails(
-      VerificationEmailMessage verificationEmailMessage
+      VerificationEmailMessage verificationEmailMessage,
+      OrderedTicketsEmailMessage orderedTicketsEmailMessage
   ) {
     return Map.of(
-        EmailType.VERIFICATION_EMAIL, verificationEmailMessage
+        EmailType.VERIFICATION_EMAIL, verificationEmailMessage,
+        EmailType.ORDERED_TICKETS_EMAIL, orderedTicketsEmailMessage
     );
   }
 }

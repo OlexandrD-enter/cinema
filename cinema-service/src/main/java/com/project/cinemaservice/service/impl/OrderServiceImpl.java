@@ -12,8 +12,16 @@ import com.project.cinemaservice.domain.dto.order.OrderStatusDetails;
 import com.project.cinemaservice.domain.dto.roomseat.RoomSeatBriefInfo;
 import com.project.cinemaservice.domain.mapper.OrderMapper;
 import com.project.cinemaservice.messaging.OrderReservationEventPublisher;
+import com.project.cinemaservice.messaging.OrderedTicketsEventPublisher;
 import com.project.cinemaservice.messaging.event.OrderReservationEvent;
+import com.project.cinemaservice.messaging.event.OrderedTicketsEvent;
+import com.project.cinemaservice.messaging.event.OrderedTicketsEvent.TicketDetails;
+import com.project.cinemaservice.persistence.enums.MovieFileType;
 import com.project.cinemaservice.persistence.enums.OrderStatus;
+import com.project.cinemaservice.persistence.model.Cinema;
+import com.project.cinemaservice.persistence.model.CinemaRoom;
+import com.project.cinemaservice.persistence.model.Movie;
+import com.project.cinemaservice.persistence.model.MovieFile;
 import com.project.cinemaservice.persistence.model.Order;
 import com.project.cinemaservice.persistence.model.OrderPaymentDetails;
 import com.project.cinemaservice.persistence.model.OrderTicket;
@@ -68,6 +76,7 @@ public class OrderServiceImpl implements OrderService {
   private final OrderPaymentDetailsRepository orderPaymentDetailsRepository;
   private final Map<OrderStatus, Set<OrderStatus>> orderStatusTransitionsMap;
   private final OrderReservationEventPublisher orderReservationEventPublisher;
+  private final OrderedTicketsEventPublisher orderedTicketsEventPublisher;
   private final OrderMapper orderMapper;
   private final MediaServiceClient mediaServiceClient;
   private final PaymentServiceClient paymentServiceClient;
@@ -103,6 +112,7 @@ public class OrderServiceImpl implements OrderService {
       OrderPaymentDetailsRepository orderPaymentDetailsRepository,
       Map<OrderStatus, Set<OrderStatus>> orderStatusTransitionsMap,
       OrderReservationEventPublisher orderReservationEventPublisher,
+      OrderedTicketsEventPublisher orderedTicketsEventPublisher,
       OrderMapper orderMapper, MediaServiceClient mediaServiceClient,
       PaymentServiceClient paymentServiceClient,
       @Value("${orders.left-time-for-cancel}") long leftTimeBeforeSuccessCancelOrOrderInMinutes) {
@@ -114,6 +124,7 @@ public class OrderServiceImpl implements OrderService {
     this.orderPaymentDetailsRepository = orderPaymentDetailsRepository;
     this.orderStatusTransitionsMap = orderStatusTransitionsMap;
     this.orderReservationEventPublisher = orderReservationEventPublisher;
+    this.orderedTicketsEventPublisher = orderedTicketsEventPublisher;
     this.orderMapper = orderMapper;
     this.mediaServiceClient = mediaServiceClient;
     this.paymentServiceClient = paymentServiceClient;
@@ -150,8 +161,8 @@ public class OrderServiceImpl implements OrderService {
         .map(roomSeatId -> {
           RoomSeat roomSeat = roomSeatRepository.findByIdAndCinemaRoomId(roomSeatId,
               roomIdFromShowtime).orElseThrow(() -> new EntityNotFoundException(
-                  String.format("RoomSeat with id=%d not found in CinemaRoom id=%d", roomSeatId,
-                      showtime.getCinemaRoom().getId())));
+              String.format("RoomSeat with id=%d not found in CinemaRoom id=%d", roomSeatId,
+                  showtime.getCinemaRoom().getId())));
 
           Ticket ticket = ticketRepository.save(Ticket.builder()
               .roomSeat(roomSeat)
@@ -213,6 +224,10 @@ public class OrderServiceImpl implements OrderService {
         .build());
 
     Order savedOrder = orderRepository.save(order);
+
+    OrderedTicketsEvent orderedTickets = createOrderedTicketsEvent(order);
+
+    orderedTicketsEventPublisher.sendOrderedTicketsEvent(orderedTickets);
 
     log.debug("Changed order status to paid for order {}", orderId);
 
@@ -366,5 +381,55 @@ public class OrderServiceImpl implements OrderService {
       throw new DateViolationException(
           "Both 'From creation time' and 'To creation time' must be provided");
     }
+  }
+
+  private OrderedTicketsEvent createOrderedTicketsEvent(Order order) {
+    OrderedTicketsEvent orderedTickets = new OrderedTicketsEvent();
+    order.getOrderTickets().stream()
+        .map(OrderTicket::getTicket)
+        .findFirst()
+        .map(Ticket::getShowtime)
+        .ifPresent(showtime -> {
+          CinemaRoom cinemaRoom = showtime.getCinemaRoom();
+          Cinema cinema = cinemaRoom.getCinema();
+          Movie movie = showtime.getMovie();
+
+          Long fileId = movie.getMovieFiles().stream()
+              .filter(movieFile -> movieFile.getMovieFileType().equals(MovieFileType.MOVIE_PREVIEW))
+              .findFirst()
+              .map(MovieFile::getFileId)
+              .orElseThrow(() -> new EntityNotFoundException("Movie preview file not found"));
+
+          MovieFileResponseUrl file = mediaServiceClient.getFile(fileId);
+
+          orderedTickets.setMovieName(movie.getName());
+          orderedTickets.setMoviePreviewUrl(file.getAccessUrl());
+          orderedTickets.setAgeLimit(movie.getAgeLimit());
+          orderedTickets.setStartDate(showtime.getStartDate());
+          orderedTickets.setCinemaRoomName(cinemaRoom.getName());
+          orderedTickets.setCity(cinema.getCity());
+          orderedTickets.setStreetAddress(cinema.getStreetAddress());
+        });
+
+    orderedTickets.setOrderId(order.getId());
+    orderedTickets.setOwnerEmail(order.getAuditEntity().getCreatedBy());
+
+    List<TicketDetails> ticketDetailsList = getTicketDetails(order);
+    orderedTickets.setTickets(ticketDetailsList);
+
+    return orderedTickets;
+  }
+
+  private List<TicketDetails> getTicketDetails(Order order) {
+    return order.getOrderTickets().stream()
+        .map(OrderTicket::getTicket)
+        .map(ticket -> {
+          TicketDetails ticketDetails = new TicketDetails();
+          ticketDetails.setCinemaRoomName(ticket.getRoomSeat().getCinemaRoom().getName());
+          ticketDetails.setRoomSeatNumber(ticket.getRoomSeat().getSeatNumber());
+          ticketDetails.setPrice(ticket.getShowtime().getPrice());
+          return ticketDetails;
+        })
+        .toList();
   }
 }
