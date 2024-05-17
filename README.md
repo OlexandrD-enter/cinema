@@ -125,6 +125,10 @@ with such core functionality split by microservices:
     - Description: Starter for testing Spring Boot applications.
 - [Spring Security Test]()
     - Description: Testing utilities for Spring Security.
+- [Testcontainers JUnit Jupiter]() - Version 1.18.3 (Test Scope)
+  - Description: Testing library for Docker containers in JUnit tests.
+- [Testcontainers PostgreSQL]() - Version 1.18.3 (Test Scope)
+  - Description: Testcontainers module for PostgreSQL database.
 
 
 ## Swagger

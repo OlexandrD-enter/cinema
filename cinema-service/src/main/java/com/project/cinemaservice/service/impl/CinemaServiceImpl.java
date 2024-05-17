@@ -46,7 +46,7 @@ public class CinemaServiceImpl implements CinemaService {
     String cinemaName = cinemaDataRequest.getName();
     log.debug("Updating cinema with id {}", cinemaId);
 
-    checkIfCinemaExistByName(cinemaName);
+    checkIfCinemaExistByNameForEdit(cinemaName, cinemaId);
 
     Cinema cinema = findCinemaEntityById(cinemaId);
 
@@ -83,6 +83,13 @@ public class CinemaServiceImpl implements CinemaService {
 
   private void checkIfCinemaExistByName(String cinemaName) {
     if (cinemaRepository.findByName(cinemaName).isPresent()) {
+      throw new EntityAlreadyExistsException(
+          String.format("Cinema with name='%s' already exists", cinemaName));
+    }
+  }
+
+  private void checkIfCinemaExistByNameForEdit(String cinemaName, Long cinemaId) {
+    if (cinemaRepository.existsByNameAndIdNot(cinemaName, cinemaId)) {
       throw new EntityAlreadyExistsException(
           String.format("Cinema with name='%s' already exists", cinemaName));
     }

@@ -14,6 +14,8 @@ public interface CinemaRepository extends JpaRepository<Cinema, Long> {
 
   Optional<Cinema> findByName(String name);
 
+  boolean existsByNameAndIdNot(String name, Long id);
+
   @EntityGraph(attributePaths = {"cinemaRooms"})
   Optional<Cinema> findById(Long id);
 }

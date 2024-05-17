@@ -92,7 +92,7 @@ public class CinemaServiceImplTest {
         .streetAddress(cinema.getStreetAddress())
         .build();
 
-    when(cinemaRepository.findByName("Cinema")).thenReturn(Optional.empty());
+    when(cinemaRepository.existsByNameAndIdNot("Cinema", 1L)).thenReturn(false);
     when(cinemaRepository.findById(cinemaId)).thenReturn(Optional.of(cinema));
     when(cinemaRepository.save(cinema)).thenReturn(cinema);
     when(cinemaMapper.toCinemaAdminResponse(cinema)).thenReturn(expectedResponse);
@@ -105,6 +105,18 @@ public class CinemaServiceImplTest {
     assertEquals(expectedResponse.getName(), response.getName());
     assertEquals(expectedResponse.getCity(), response.getCity());
     assertEquals(expectedResponse.getStreetAddress(), response.getStreetAddress());
+  }
+
+  @Test
+  void editCinema_WhenCinemaAlreadyExists_ThrowsEntityNotFoundException() {
+    // Given
+    long cinemaId = 1L;
+    CinemaDataRequest request = new CinemaDataRequest("Cinema", "City", "Address, 1");
+
+    when(cinemaRepository.existsByNameAndIdNot("Cinema", 1L)).thenReturn(true);
+
+    // When & Then
+    assertThrows(EntityAlreadyExistsException.class, () -> cinemaService.editCinema(cinemaId, request));
   }
 
   @Test

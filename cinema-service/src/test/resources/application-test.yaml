@@ -1,0 +1,39 @@
+eureka:
+  client:
+    enabled: false
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: cinema_service
+
+  flyway:
+    schemas: cinema_service
+    locations: db/migration/base
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:9999/realms/test-realm/protocol/openid-connect/certs
+
+jwt:
+  auth:
+    converter:
+      principle-attribute: preferred_username
+
+media-service:
+  url: http://localhost:8081
+
+payment-service:
+  url: http://localhost:8082
+
+movies:
+  delay-between-showtime: 1
+
+orders:
+  reservation-time: 1
+  left-time-for-cancel: 1
