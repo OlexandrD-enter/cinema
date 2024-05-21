@@ -168,7 +168,7 @@ Replace [your_token] with the actual token.
 1. Clone this repository to your local machine:
 
     ```bash
-    git clone link
+    git clone https://github.com/OlexandrD-enter/cinema.git
     cd cinema
     ```
 
